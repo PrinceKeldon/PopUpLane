@@ -11,9 +11,9 @@ def assign_badges(merchant_data: dict) -> List[str]:
         badges.append(category.capitalize())
     
     # Sustainability keywords
-    description = merchant_data.get('description', '').lower()
-    story = merchant_data.get('story', '').lower()
-    combined_text = f"{description} {story}"
+    description = merchant_data.get('description', '') or ''
+    story = merchant_data.get('story', '') or ''
+    combined_text = f"{description.lower()} {story.lower()}"
     
     if any(word in combined_text for word in ['sustainable', 'organic', 'eco', 'ethical', 'green']):
         badges.append('Sustainable')
