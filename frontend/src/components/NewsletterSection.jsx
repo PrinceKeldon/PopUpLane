@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Mail, Sparkles } from 'lucide-react';
 import { toast } from '../hooks/use-toast';
+import { shoppersAPI } from '../api/client';
 
 const NewsletterSection = () => {
   const [email, setEmail] = useState('');
@@ -22,15 +23,27 @@ const NewsletterSection = () => {
 
     setIsSubmitting(true);
 
-    // Mock submission - will be connected to backend later
-    setTimeout(() => {
+    try {
+      const response = await shoppersAPI.subscribe({ 
+        email, 
+        source: 'newsletter_section' 
+      });
+      
       toast({
         title: 'Success!',
-        description: 'You\'re on the list! We\'ll notify you when the Lane opens.',
+        description: response.data.message || 'You\'re on the list! We\'ll notify you when the Lane opens.',
       });
       setEmail('');
+    } catch (error) {
+      console.error('Newsletter signup error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to subscribe. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (

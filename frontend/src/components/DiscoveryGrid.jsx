@@ -1,21 +1,53 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import MerchantCard from './MerchantCard';
-import { MOCK_MERCHANTS, CATEGORIES } from '../data/mock';
+import { CATEGORIES } from '../data/mock';
+import { merchantsAPI } from '../api/client';
+import { toast } from '../hooks/use-toast';
 
 const DiscoveryGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [savedMerchants, setSavedMerchants] = useState([]);
+  const [merchants, setMerchants] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMerchants();
+  }, []);
+
+  const fetchMerchants = async () => {
+    try {
+      setLoading(true);
+      const response = await merchantsAPI.getAll();
+      setMerchants(response.data);
+    } catch (error) {
+      console.error('Error fetching merchants:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load merchants. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredMerchants = useMemo(() => {
     if (selectedCategory === 'All') {
-      return MOCK_MERCHANTS;
+      return merchants;
     }
-    return MOCK_MERCHANTS.filter(m => m.category === selectedCategory);
-  }, [selectedCategory]);
+    return merchants.filter(m => m.category === selectedCategory);
+  }, [selectedCategory, merchants]);
 
-  const handleVisit = (merchant) => {
-    // In production, this would track clicks and add UTM parameters
+  const handleVisit = async (merchant) => {
+    // Track click
+    try {
+      await merchantsAPI.trackClick(merchant.id);
+    } catch (error) {
+      console.error('Failed to track click:', error);
+    }
+
+    // Open external URL
     const url = new URL(merchant.externalUrl);
     url.searchParams.append('utm_source', 'popuplane');
     url.searchParams.append('utm_medium', 'lane');
@@ -23,9 +55,19 @@ const DiscoveryGrid = () => {
     window.open(url.toString(), '_blank');
   };
 
-  const handleSave = (merchant) => {
+  const handleSave = async (merchant) => {
+    const isSaved = savedMerchants.includes(merchant.id);
+    
+    if (!isSaved) {
+      // Track save
+      try {
+        await merchantsAPI.trackSave(merchant.id);
+      } catch (error) {
+        console.error('Failed to track save:', error);
+      }
+    }
+
     setSavedMerchants(prev => {
-      const isSaved = prev.includes(merchant.id);
       if (isSaved) {
         return prev.filter(id => id !== merchant.id);
       } else {
@@ -33,6 +75,16 @@ const DiscoveryGrid = () => {
       }
     });
   };
+
+  if (loading) {
+    return (
+      <section className="discovery-grid-section py-20 px-6" style={{ backgroundColor: '#FAFAFA' }}>
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-lg" style={{ color: '#666' }}>Loading amazing brands...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="discovery-grid-section py-20 px-6" style={{ backgroundColor: '#FAFAFA' }}>
@@ -71,17 +123,23 @@ const DiscoveryGrid = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredMerchants.map(merchant => (
-            <MerchantCard 
-              key={merchant.id}
-              merchant={merchant}
-              onVisit={handleVisit}
-              onSave={handleSave}
-              isSaved={savedMerchants.includes(merchant.id)}
-            />
-          ))}
-        </div>
+        {filteredMerchants.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredMerchants.map(merchant => (
+              <MerchantCard 
+                key={merchant.id}
+                merchant={merchant}
+                onVisit={handleVisit}
+                onSave={handleSave}
+                isSaved={savedMerchants.includes(merchant.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-lg" style={{ color: '#666' }}>No merchants found in this category yet.</p>
+          </div>
+        )}
 
         {/* Body Copy */}
         <div className="text-center mt-12 space-y-4">
