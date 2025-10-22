@@ -57,11 +57,30 @@ const Hero = ({ onGetNotified, onExplore }) => {
         </div>
 
         {/* Countdown Timer */}
-        <div className="countdown-container p-8 rounded-2xl" style={{ backgroundColor: 'rgba(250, 250, 250, 0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(250, 250, 250, 0.1)' }}>
-          <p className="text-sm uppercase tracking-wider mb-4" style={{ color: '#FAFAFA', opacity: 0.7, fontFamily: 'Space Grotesk, sans-serif' }}>
+        <div 
+          className="countdown-container p-8 md:p-10 rounded-3xl relative overflow-hidden" 
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.8) 0%, rgba(17, 17, 17, 0.6) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '2px solid',
+            borderImage: 'linear-gradient(135deg, rgba(58, 123, 213, 0.5), rgba(255, 79, 129, 0.5)) 1',
+            boxShadow: '0 0 60px rgba(58, 123, 213, 0.3), 0 0 100px rgba(255, 79, 129, 0.2)'
+          }}
+        >
+          <div className="absolute inset-0 opacity-10" style={{ 
+            background: 'linear-gradient(45deg, #3A7BD5 0%, #FF4F81 100%)',
+            animation: 'shimmer 3s ease-in-out infinite'
+          }}></div>
+          <p className="text-sm md:text-base uppercase tracking-widest mb-6 font-bold relative z-10" style={{ 
+            color: '#FAFAFA', 
+            fontFamily: 'Space Grotesk, sans-serif',
+            textShadow: '0 0 20px rgba(58, 123, 213, 0.5)'
+          }}>
             Lane Opens In
           </p>
-          <CountdownTimer targetDate={LANE_CONFIG.openDate} />
+          <div className="relative z-10">
+            <CountdownTimer targetDate={LANE_CONFIG.openDate} />
+          </div>
         </div>
       </div>
 
