@@ -100,6 +100,15 @@ const Hero = ({ onGetNotified, onExplore }) => {
             transform: translateX(50%) translateY(50%);
           }
         }
+
+        @keyframes shimmer {
+          0%, 100% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(100%);
+          }
+        }
       `}</style>
     </section>
   );
