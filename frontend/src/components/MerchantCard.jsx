@@ -1,28 +1,121 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { ExternalLink, Bookmark } from 'lucide-react';
+import { ExternalLink, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const allImages = [merchant.imageUrl, ...(merchant.additionalImages || [])];
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <Card className="merchant-card overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl" style={{ backgroundColor: '#FAFAFA', border: '1px solid #e5e5e5' }}>
-      {/* Image */}
-      <div className="relative h-64 overflow-hidden">
+      {/* Main Image with Navigation */}
+      <div className="relative h-64 overflow-hidden group">
         <img 
-          src={merchant.imageUrl} 
-          alt={merchant.brandName}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          src={allImages[currentImageIndex]} 
+          alt={`${merchant.brandName} - Image ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover transition-transform duration-500"
           loading="lazy"
         />
+        
         {/* Discount Badge */}
         <div className="absolute top-4 right-4 px-4 py-2 rounded-full font-bold animate-pulse" style={{ backgroundColor: '#FF4F81', color: '#FAFAFA' }}>
           {merchant.discount}
         </div>
+
+        {/* Image Navigation Arrows */}
+        {allImages.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 rounded-full"
+              style={{ backgroundColor: 'rgba(17, 17, 17, 0.7)' }}
+            >
+              <ChevronLeft className="h-5 w-5" style={{ color: '#FAFAFA' }} />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 rounded-full"
+              style={{ backgroundColor: 'rgba(17, 17, 17, 0.7)' }}
+            >
+              <ChevronRight className="h-5 w-5" style={{ color: '#FAFAFA' }} />
+            </button>
+          </>
+        )}
+
+        {/* Image Dots Indicator */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {allImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndex(index);
+                }}
+                className="w-2 h-2 rounded-full transition-all duration-300"
+                style={{
+                  backgroundColor: currentImageIndex === index ? '#FF4F81' : 'rgba(250, 250, 250, 0.5)',
+                  width: currentImageIndex === index ? '24px' : '8px'
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* Additional Images Thumbnail Scroll */}
+      {merchant.additionalImages && merchant.additionalImages.length > 0 && (
+        <div className="px-4 pt-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            <button
+              onClick={() => setCurrentImageIndex(0)}
+              className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-300"
+              style={{
+                border: currentImageIndex === 0 ? '2px solid #3A7BD5' : '2px solid transparent',
+                opacity: currentImageIndex === 0 ? 1 : 0.6
+              }}
+            >
+              <img 
+                src={merchant.imageUrl}
+                alt={`${merchant.brandName} main`}
+                className="w-full h-full object-cover"
+              />
+            </button>
+            {merchant.additionalImages.map((img, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index + 1)}
+                className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-300 hover:opacity-100"
+                style={{
+                  border: currentImageIndex === index + 1 ? '2px solid #3A7BD5' : '2px solid transparent',
+                  opacity: currentImageIndex === index + 1 ? 1 : 0.6
+                }}
+              >
+                <img 
+                  src={img}
+                  alt={`${merchant.brandName} ${index + 2}`}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Content */}
-      <div className="p-6">
+      <div className="p-6 pt-4">
         <div className="mb-3">
           <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
             {merchant.brandName}
@@ -90,6 +183,17 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
           50% {
             opacity: 0.8;
           }
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: #e5e5e5;
+          border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #3A7BD5;
+          border-radius: 4px;
         }
       `}</style>
     </Card>
