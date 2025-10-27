@@ -6,8 +6,9 @@ const Footer = () => {
   const links = [
     { label: 'About', href: '#about' },
     { label: 'Contact', href: '#contact' },
-    { label: 'Submit a Deal', href: '#submit' },
+    { label: 'Submit a Deal', href: '/merchant/submit' },
     { label: 'Browse', href: '#browse' },
+    { label: 'Admin', href: '/admin/login' },
     { label: 'Privacy Policy', href: '#privacy' }
   ];
 
