@@ -55,6 +55,21 @@ const Hero = ({ onGetNotified, onExplore }) => {
             Get Notified
           </Button>
         </div>
+        
+        {/* Merchant CTA */}
+        <div className="text-center mb-12">
+          <p className="text-sm mb-3" style={{ color: '#FAFAFA', opacity: 0.7 }}>
+            Are you a merchant or creator?
+          </p>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => window.location.href = '/merchant/submit'}
+            style={{ color: '#FF4F81', textDecoration: 'underline' }}
+          >
+            List Your Deal on PopUp Lane
+          </Button>
+        </div>
 
         {/* Countdown Timer */}
         <div 
