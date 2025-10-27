@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Hero from "./components/Hero";
 import AboutSection from "./components/AboutSection";
 import HowItWorks from "./components/HowItWorks";
 import DiscoveryGrid from "./components/DiscoveryGrid";
 import NewsletterSection from "./components/NewsletterSection";
 import Footer from "./components/Footer";
+import MerchantSubmission from "./pages/MerchantSubmission";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 import { Toaster } from "./components/ui/toaster";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -28,7 +33,7 @@ const Home = () => {
       </div>
       <HowItWorks 
         onShopperCTA={() => scrollToSection('discovery')}
-        onMerchantCTA={() => scrollToSection('newsletter')}
+        onMerchantCTA={() => navigate('/merchant/submit')}
       />
       <div id="discovery">
         <DiscoveryGrid />
@@ -47,6 +52,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/merchant/submit" element={<MerchantSubmission />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
       <Toaster />
