@@ -33,9 +33,19 @@ const AdminDashboard = () => {
       const statsResponse = await adminAPI.getDashboard();
       setStats(statsResponse.data);
 
-      // Fetch all merchants (including pending)
-      const merchantsResponse = await merchantsAPI.getAll({ status: 'all' });
-      setMerchants(merchantsResponse.data);
+      // Fetch all merchants (need to get all statuses separately and combine)
+      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+        merchantsAPI.getAll({ status: 'pending' }),
+        merchantsAPI.getAll({ status: 'approved' }),
+        merchantsAPI.getAll({ status: 'rejected' })
+      ]);
+      
+      const allMerchants = [
+        ...pendingRes.data,
+        ...approvedRes.data,
+        ...rejectedRes.data
+      ];
+      setMerchants(allMerchants);
 
     } catch (error) {
       console.error('Error fetching data:', error);
