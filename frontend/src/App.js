@@ -35,7 +35,7 @@ const Home = () => {
       </div>
       <HowItWorks 
         onShopperCTA={() => scrollToSection('discovery')}
-        onMerchantCTA={() => navigate('/merchant/submit')}
+        onMerchantCTA={() => navigate('/merchant/signin')}
       />
       <div id="discovery">
         <DiscoveryGrid />
