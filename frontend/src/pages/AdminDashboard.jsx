@@ -478,6 +478,7 @@ const AdminDashboard = () => {
             )}
           </div>
         </Card>
+        )}
       </div>
     </div>
   );
