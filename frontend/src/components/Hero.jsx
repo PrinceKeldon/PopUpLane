@@ -64,7 +64,7 @@ const Hero = ({ onGetNotified, onExplore }) => {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => window.location.href = '/merchant/submit'}
+            onClick={() => window.location.href = '/merchant/signin'}
             style={{ color: '#FF4F81', textDecoration: 'underline' }}
           >
             List Your Deal on PopUp Lane
