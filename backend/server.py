@@ -798,8 +798,8 @@ async def generate_podcast(
         }
     
     except Exception as e:
-        logging.error(f\"Error generating podcast: {str(e)}\")
-        raise HTTPException(status_code=500, detail=f\"Failed to generate podcast: {str(e)}\")
+        logging.error(f"Error generating podcast: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate podcast: {str(e)}")
 
 
 @api_router.get("/merchant/podcasts")
@@ -813,30 +813,30 @@ async def get_merchant_podcasts(merchant_data: dict = Depends(verify_merchant_to
         raise HTTPException(status_code=500, detail="Failed to fetch podcasts")
 
 
-@api_router.get(\"/podcasts/{podcast_id}\", response_model=PodcastResponse)
+@api_router.get("/podcasts/{podcast_id}", response_model=PodcastResponse)
 async def get_podcast(podcast_id: str):
-    \"\"\"Get podcast by ID (public)\"\"\"
+    """Get podcast by ID (public)"""
     try:
-        podcast = await db.podcasts.find_one({\"id\": podcast_id})
+        podcast = await db.podcasts.find_one({"id": podcast_id})
         if not podcast:
-            raise HTTPException(status_code=404, detail=\"Podcast not found\")
+            raise HTTPException(status_code=404, detail="Podcast not found")
         
         return PodcastResponse(**podcast)
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f\"Error fetching podcast: {str(e)}\")
-        raise HTTPException(status_code=500, detail=\"Failed to fetch podcast\")
+        logging.error(f"Error fetching podcast: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch podcast")
 
 
-@api_router.get(\"/merchants/{merchant_id}/founder-story\")
+@api_router.get("/merchants/{merchant_id}/founder-story")
 async def get_founder_story(merchant_id: str):
-    \"\"\"Get founder story podcast for a merchant (public)\"\"\"
+    """Get founder story podcast for a merchant (public)"""
     try:
         podcast = await db.podcasts.find_one({
-            \"merchantAccountId\": merchant_id,
-            \"episodeType\": \"founder_story\",
-            \"status\": \"active\"
+            "merchantAccountId": merchant_id,
+            "episodeType": "founder_story",
+            "status": "active"
         })
         
         if not podcast:
@@ -844,18 +844,18 @@ async def get_founder_story(merchant_id: str):
         
         return PodcastResponse(**podcast)
     except Exception as e:
-        logging.error(f\"Error fetching founder story: {str(e)}\")
+        logging.error(f"Error fetching founder story: {str(e)}")
         return None
 
 
-@api_router.get(\"/deals/{deal_id}/drop-episode\")
+@api_router.get("/deals/{deal_id}/drop-episode")
 async def get_drop_episode(deal_id: str):
-    \"\"\"Get drop episode for a deal (public)\"\"\"
+    """Get drop episode for a deal (public)"""
     try:
         podcast = await db.podcasts.find_one({
-            \"dealId\": deal_id,
-            \"episodeType\": \"drop_episode\",
-            \"status\": \"active\"
+            "dealId": deal_id,
+            "episodeType": "drop_episode",
+            "status": "active"
         })
         
         if not podcast:
@@ -863,31 +863,31 @@ async def get_drop_episode(deal_id: str):
         
         return PodcastResponse(**podcast)
     except Exception as e:
-        logging.error(f\"Error fetching drop episode: {str(e)}\")
+        logging.error(f"Error fetching drop episode: {str(e)}")
         return None
 
 
-@api_router.delete(\"/merchant/podcasts/{podcast_id}\")
+@api_router.delete("/merchant/podcasts/{podcast_id}")
 async def delete_podcast(
     podcast_id: str,
     merchant_data: dict = Depends(verify_merchant_token)
 ):
-    \"\"\"Delete/archive a podcast\"\"\"
+    """Delete/archive a podcast"""
     try:
         result = await db.podcasts.update_one(
-            {\"id\": podcast_id, \"merchantAccountId\": merchant_data['merchant_id']},
-            {\"$set\": {\"status\": \"archived\"}}
+            {"id": podcast_id, "merchantAccountId": merchant_data['merchant_id']},
+            {"$set": {"status": "archived"}}
         )
         
         if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail=\"Podcast not found\")
+            raise HTTPException(status_code=404, detail="Podcast not found")
         
-        return {\"message\": \"Podcast archived successfully\"}
+        return {"message": "Podcast archived successfully"}
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f\"Error deleting podcast: {str(e)}\")
-        raise HTTPException(status_code=500, detail=\"Failed to delete podcast\")
+        logging.error(f"Error deleting podcast: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete podcast")
 
 
 # ========== ADMIN ENDPOINTS ==========
