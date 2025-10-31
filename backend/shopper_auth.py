@@ -1,6 +1,7 @@
 import os
 import jwt
 from datetime import datetime, timedelta
+from typing import Optional
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
