@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { ExternalLink, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { ExternalLink, Bookmark, ChevronLeft, ChevronRight, Share2, Instagram, Twitter, Facebook, Mail, Copy } from 'lucide-react';
+import { toast } from '../hooks/use-toast';
 
 const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
