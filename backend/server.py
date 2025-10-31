@@ -525,6 +525,62 @@ async def admin_login(credentials: AdminLogin):
     return create_admin_token()
 
 
+@api_router.get("/admin/merchant-accounts")
+async def get_merchant_accounts(
+    status: Optional[str] = Query(None),
+    authorized: bool = Depends(verify_admin_token)
+):
+    """Get all merchant accounts (admin only)"""
+    try:
+        query = {}
+        if status:
+            query['accountStatus'] = status
+        
+        accounts = await db.merchant_accounts.find(query).to_list(1000)
+        # Remove password hashes
+        for account in accounts:
+            account.pop('passwordHash', None)
+        return accounts
+    except Exception as e:
+        logging.error(f"Error fetching merchant accounts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch merchant accounts")
+
+
+@api_router.patch("/admin/merchant-accounts/{account_id}/status")
+async def update_merchant_account_status(
+    account_id: str,
+    status_update: MerchantAccountStatusUpdate,
+    authorized: bool = Depends(verify_admin_token)
+):
+    """Approve/reject merchant account (admin only)"""
+    try:
+        update_data = {
+            "accountStatus": status_update.status,
+            "updatedAt": datetime.utcnow()
+        }
+        
+        if status_update.status == MerchantAccountStatus.ACTIVE:
+            update_data["approvedAt"] = datetime.utcnow()
+        
+        if status_update.rejectionReason:
+            update_data["rejectionReason"] = status_update.rejectionReason
+        
+        result = await db.merchant_accounts.update_one(
+            {"id": account_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Merchant account not found")
+        
+        return {"message": "Merchant account status updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating merchant account status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update status")
+
+
 @api_router.get("/admin/dashboard", response_model=DashboardStats)
 async def get_dashboard_stats(authorized: bool = Depends(verify_admin_token)):
     """Get dashboard statistics (admin only)"""
