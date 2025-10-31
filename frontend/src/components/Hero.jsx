@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { ArrowRight, Bell } from 'lucide-react';
+import { ArrowRight, Bell, Heart, User, LogOut } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { LANE_CONFIG } from '../data/mock';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = ({ onGetNotified, onExplore }) => {
   return (
