@@ -168,9 +168,35 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Section Navigation */}
+        <div className="flex gap-4 mb-8">
+          <Button
+            onClick={() => setActiveSection('deals')}
+            variant={activeSection === 'deals' ? 'default' : 'outline'}
+            style={{
+              backgroundColor: activeSection === 'deals' ? '#3A7BD5' : 'transparent',
+              color: activeSection === 'deals' ? '#FAFAFA' : '#111',
+              borderColor: '#e5e5e5'
+            }}
+          >
+            Deal Management
+          </Button>
+          <Button
+            onClick={() => setActiveSection('accounts')}
+            variant={activeSection === 'accounts' ? 'default' : 'outline'}
+            style={{
+              backgroundColor: activeSection === 'accounts' ? '#3A7BD5' : 'transparent',
+              color: activeSection === 'accounts' ? '#FAFAFA' : '#111',
+              borderColor: '#e5e5e5'
+            }}
+          >
+            Merchant Accounts
+          </Button>
+        </div>
+
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
               <div className="flex items-center justify-between">
                 <div>
