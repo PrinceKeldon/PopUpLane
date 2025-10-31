@@ -62,6 +62,9 @@ function App() {
           <Route path="/merchant/register" element={<MerchantRegister />} />
           <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
           <Route path="/merchant/submit" element={<MerchantSubmission />} />
+          <Route path="/shopper/signin" element={<ShopperSignIn />} />
+          <Route path="/shopper/register" element={<ShopperRegister />} />
+          <Route path="/my-finds" element={<MyFinds />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
