@@ -15,20 +15,41 @@ const API = `${BACKEND_URL}/api`;
 const MerchantSubmission = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [merchantAccount, setMerchantAccount] = useState(null);
+  const [mainImage, setMainImage] = useState(null);
+  const [mainImagePreview, setMainImagePreview] = useState(null);
+  const [additionalImages, setAdditionalImages] = useState([null, null, null, null]);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState([null, null, null, null]);
+  
   const [formData, setFormData] = useState({
     brandName: '',
     tagline: '',
     description: '',
     discount: '',
     category: 'Home',
-    imageUrl: '',
-    additionalImages: ['', '', '', ''],
     externalUrl: '',
-    email: '',
     story: ''
   });
 
   const categories = ['Home', 'Style', 'Tech', 'Beauty', 'Food', 'Accessories', 'Health'];
+
+  useEffect(() => {
+    // Check if merchant is logged in
+    const token = localStorage.getItem('merchant_token');
+    const accountData = localStorage.getItem('merchant_account');
+    
+    if (!token || !accountData) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to submit a deal.',
+        variant: 'destructive'
+      });
+      navigate('/merchant/signin');
+      return;
+    }
+
+    setMerchantAccount(JSON.parse(accountData));
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
