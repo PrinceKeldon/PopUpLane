@@ -28,7 +28,9 @@ from shopper_models import ShopperAccount, ShopperAccountCreate, ShopperAccountL
 from shopper_auth import hash_password as hash_shopper_password, verify_password as verify_shopper_password, create_shopper_token, verify_shopper_token
 from file_handler import save_upload_file, delete_upload_file
 from utils import assign_badges
-from fastapi import UploadFile, File, Form
+from fastapi import UploadFile, File, Form, BackgroundTasks
+from podcast_models import Podcast, PodcastGenerateRequest, PodcastResponse
+from podcast_generator import (\n    generate_founder_story_script,\n    generate_drop_episode_script,\n    generate_audio_from_script,\n    format_transcript\n)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
