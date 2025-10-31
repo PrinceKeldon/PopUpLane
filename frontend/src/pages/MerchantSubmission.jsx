@@ -56,10 +56,57 @@ const MerchantSubmission = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAdditionalImageChange = (index, value) => {
-    const newImages = [...formData.additionalImages];
-    newImages[index] = value;
-    setFormData(prev => ({ ...prev, additionalImages: newImages }));
+  const handleMainImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'File Too Large',
+          description: 'Image must be less than 5MB',
+          variant: 'destructive'
+        });
+        return;
+      }
+      setMainImage(file);
+      setMainImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAdditionalImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'File Too Large',
+          description: 'Image must be less than 5MB',
+          variant: 'destructive'
+        });
+        return;
+      }
+      const newImages = [...additionalImages];
+      newImages[index] = file;
+      setAdditionalImages(newImages);
+
+      const newPreviews = [...additionalImagePreviews];
+      newPreviews[index] = URL.createObjectURL(file);
+      setAdditionalImagePreviews(newPreviews);
+    }
+  };
+
+  const removeAdditionalImage = (index) => {
+    const newImages = [...additionalImages];
+    newImages[index] = null;
+    setAdditionalImages(newImages);
+
+    const newPreviews = [...additionalImagePreviews];
+    newPreviews[index] = null;
+    setAdditionalImagePreviews(newPreviews);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('merchant_token');
+    localStorage.removeItem('merchant_account');
+    navigate('/merchant/signin');
   };
 
   const handleSubmit = async (e) => {
