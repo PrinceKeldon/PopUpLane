@@ -24,6 +24,8 @@ from merchant_models import (
 )
 from auth import verify_admin_password, create_admin_token, verify_admin_token
 from merchant_auth import hash_password, verify_password, create_merchant_token, verify_merchant_token
+from shopper_models import ShopperAccount, ShopperAccountCreate, ShopperAccountLogin, FindSave, ShareRequest
+from shopper_auth import hash_password as hash_shopper_password, verify_password as verify_shopper_password, create_shopper_token, verify_shopper_token
 from file_handler import save_upload_file, delete_upload_file
 from utils import assign_badges
 from fastapi import UploadFile, File, Form
