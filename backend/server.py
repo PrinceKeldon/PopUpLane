@@ -748,18 +748,18 @@ async def generate_podcast(
         episode_id = str(uuid.uuid4())
         
         # Generate script based on episode type
-        if request.episodeType == \"founder_story\":
+        if request.episodeType == "founder_story":
             title, script = generate_founder_story_script(
                 brand_name=request.brandName,
                 founder_name=request.founderName,
                 brand_story=request.brandStory,
-                mission=request.mission or \"Creating amazing products\"
+                mission=request.mission or "Creating amazing products"
             )
         else:  # drop_episode
             title, script = generate_drop_episode_script(
                 product_name=request.productName,
                 description=request.productDescription,
-                features=request.productFeatures or \"\",
+                features=request.productFeatures or "",
                 price=request.productPrice,
                 discount=request.discount,
                 brand_name=request.brandName
