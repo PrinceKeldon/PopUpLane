@@ -30,7 +30,12 @@ from file_handler import save_upload_file, delete_upload_file
 from utils import assign_badges
 from fastapi import UploadFile, File, Form, BackgroundTasks
 from podcast_models import Podcast, PodcastGenerateRequest, PodcastResponse
-from podcast_generator import (\n    generate_founder_story_script,\n    generate_drop_episode_script,\n    generate_audio_from_script,\n    format_transcript\n)
+from podcast_generator import (
+    generate_founder_story_script,
+    generate_drop_episode_script,
+    generate_audio_from_script,
+    format_transcript
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
