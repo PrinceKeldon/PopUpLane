@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 from datetime import datetime
+import uuid
 
 from models import (
     Merchant, MerchantCreate, MerchantStatus, MerchantStatusUpdate,
