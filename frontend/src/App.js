@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import Hero from "./components/Hero";
+import MinimalistHero from "./components/MinimalistHero";
 import AboutSection from "./components/AboutSection";
 import HowItWorks from "./components/HowItWorks";
 import DiscoveryGrid from "./components/DiscoveryGrid";
