@@ -4,8 +4,11 @@ import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { toast } from '../hooks/use-toast';
 import { merchantsAPI, adminAPI } from '../api/client';
-import { LogOut, Check, X, Users, ShoppingBag, TrendingUp } from 'lucide-react';
+import { LogOut, Check, X, Users, ShoppingBag, TrendingUp, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
