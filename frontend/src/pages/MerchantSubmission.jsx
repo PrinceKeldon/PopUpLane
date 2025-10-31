@@ -209,8 +209,16 @@ const MerchantSubmission = () => {
             Back to Home
           </Button>
           <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#FAFAFA' }}>
-            PopUp Lane
+            PopUp Lane - {merchantAccount?.businessName}
           </h1>
+          <Button 
+            variant="ghost" 
+            onClick={handleLogout}
+            style={{ color: '#FAFAFA' }}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </header>
 
