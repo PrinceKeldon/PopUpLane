@@ -133,6 +133,49 @@ const MinimalistHero = ({ onGetNotified, onExplore }) => {
       <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none"></div>
 
       <style jsx>{`
+        .logo-3d {
+          margin-bottom: 2rem;
+        }
+
+        .popup-text {
+          background: linear-gradient(145deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: 
+            2px 2px 0px rgba(255, 215, 0, 0.3),
+            4px 4px 0px rgba(255, 165, 0, 0.2),
+            6px 6px 0px rgba(255, 140, 0, 0.1),
+            0 0 40px rgba(255, 215, 0, 0.4);
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+          transform-style: preserve-3d;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .lane-text {
+          background: linear-gradient(145deg, #FF1493 0%, #FF69B4 50%, #FFB6C1 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: 
+            2px 2px 0px rgba(255, 20, 147, 0.3),
+            4px 4px 0px rgba(255, 105, 180, 0.2),
+            6px 6px 0px rgba(255, 182, 193, 0.1),
+            0 0 40px rgba(255, 20, 147, 0.4);
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+          transform-style: preserve-3d;
+          animation: float 3s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotateX(0deg);
+          }
+          50% {
+            transform: translateY(-10px) rotateX(2deg);
+          }
+        }
+
         @keyframes fade-in-up {
           from {
             opacity: 0;
