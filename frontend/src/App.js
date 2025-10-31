@@ -57,8 +57,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/merchant/signin" element={<MerchantSignIn />} />
           <Route path="/merchant/register" element={<MerchantRegister />} />
+          <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
           <Route path="/merchant/submit" element={<MerchantSubmission />} />
-          <Route path="/merchant/dashboard" element={<MerchantSubmission />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
