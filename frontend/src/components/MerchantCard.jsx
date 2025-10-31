@@ -201,7 +201,29 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
           >
             <Bookmark className="h-4 w-4" fill={isSaved ? '#FF4F81' : 'none'} />
           </Button>
+          <Button 
+            onClick={() => setShowShareDialog(true)}
+            variant="outline"
+            size="icon"
+            className="transition-all duration-300"
+            style={{ borderColor: '#e5e5e5', color: '#666' }}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
         </div>
+
+        {/* Story Link */}
+        {merchant.story && (
+          <div className="mt-3">
+            <button
+              onClick={() => setShowStoryDialog(true)}
+              className="text-sm underline transition-colors duration-300"
+              style={{ color: '#3A7BD5' }}
+            >
+              Read the brand story
+            </button>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex gap-4 mt-4 pt-4 border-t" style={{ borderColor: '#e5e5e5' }}>
