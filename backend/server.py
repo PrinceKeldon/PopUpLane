@@ -234,6 +234,216 @@ async def update_settings(
         raise HTTPException(status_code=500, detail="Failed to update settings")
 
 
+# ========== SHOPPER ACCOUNT ENDPOINTS ==========
+
+@api_router.post("/shopper/register", status_code=201)
+async def register_shopper(account_data: ShopperAccountCreate):
+    """Register new shopper account"""
+    try:
+        # Check if email already exists
+        existing = await db.shopper_accounts.find_one({"email": account_data.email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Hash password
+        password_hash = hash_shopper_password(account_data.password)
+        
+        # Create account
+        account_dict = account_data.dict(exclude={'password'})
+        account_dict['passwordHash'] = password_hash
+        account = ShopperAccount(**account_dict)
+        
+        await db.shopper_accounts.insert_one(account.dict())
+        
+        return {
+            "id": account.id,
+            "message": "Account created successfully!"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error registering shopper: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to register")
+
+
+@api_router.post("/shopper/login")
+async def shopper_login(credentials: ShopperAccountLogin):
+    """Shopper authentication"""
+    try:
+        # Find shopper account
+        account = await db.shopper_accounts.find_one({"email": credentials.email})
+        if not account:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Verify password
+        if not verify_shopper_password(credentials.password, account['passwordHash']):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Create token
+        token_data = create_shopper_token(account['id'], account['email'])
+        
+        # Return account info (without password hash)
+        account_obj = ShopperAccount(**account)
+        account_dict = account_obj.dict(exclude={'passwordHash'})
+        
+        return {
+            **token_data,
+            "shopperAccount": account_dict
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error during shopper login: {str(e)}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+
+@api_router.get("/shopper/profile")
+async def get_shopper_profile(shopper_data: dict = Depends(verify_shopper_token)):
+    """Get current shopper's profile"""
+    try:
+        account = await db.shopper_accounts.find_one({"id": shopper_data['shopper_id']})
+        if not account:
+            raise HTTPException(status_code=404, detail="Shopper account not found")
+        
+        account_obj = ShopperAccount(**account)
+        return account_obj.dict(exclude={'passwordHash'})
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching shopper profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch profile")
+
+
+# ========== FINDS (SAVE) ENDPOINTS ==========
+
+@api_router.post("/shopper/finds/{merchant_id}")
+async def save_find(merchant_id: str, shopper_data: dict = Depends(verify_shopper_token)):
+    """Save a merchant to shopper's finds"""
+    try:
+        shopper_id = shopper_data['shopper_id']
+        
+        # Check if already saved
+        existing = await db.finds.find_one({
+            "shopperId": shopper_id,
+            "merchantId": merchant_id
+        })
+        
+        if existing:
+            return {"message": "Already in your finds", "saved": True}
+        
+        # Create find
+        find = FindSave(shopperId=shopper_id, merchantId=merchant_id)
+        await db.finds.insert_one(find.dict())
+        
+        # Increment merchant saves count
+        await db.merchants.update_one(
+            {"id": merchant_id},
+            {"$inc": {"saves": 1}}
+        )
+        
+        return {"message": "Added to finds", "saved": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error saving find: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save find")
+
+
+@api_router.delete("/shopper/finds/{merchant_id}")
+async def remove_find(merchant_id: str, shopper_data: dict = Depends(verify_shopper_token)):
+    """Remove a merchant from shopper's finds"""
+    try:
+        shopper_id = shopper_data['shopper_id']
+        
+        result = await db.finds.delete_one({
+            "shopperId": shopper_id,
+            "merchantId": merchant_id
+        })
+        
+        if result.deleted_count > 0:
+            # Decrement merchant saves count
+            await db.merchants.update_one(
+                {"id": merchant_id},
+                {"$inc": {"saves": -1}}
+            )
+        
+        return {"message": "Removed from finds", "saved": False}
+    except Exception as e:
+        logging.error(f"Error removing find: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to remove find")
+
+
+@api_router.get("/shopper/finds")
+async def get_finds(shopper_data: dict = Depends(verify_shopper_token)):
+    """Get all saved finds for shopper"""
+    try:
+        shopper_id = shopper_data['shopper_id']
+        
+        # Get all finds
+        finds = await db.finds.find({"shopperId": shopper_id}).to_list(1000)
+        merchant_ids = [f['merchantId'] for f in finds]
+        
+        if not merchant_ids:
+            return []
+        
+        # Get merchant details
+        merchants = await db.merchants.find({
+            "id": {"$in": merchant_ids},
+            "status": "approved"
+        }).to_list(1000)
+        
+        return [Merchant(**m) for m in merchants]
+    except Exception as e:
+        logging.error(f"Error fetching finds: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch finds")
+
+
+@api_router.get("/shopper/finds/check/{merchant_id}")
+async def check_if_saved(merchant_id: str, shopper_data: dict = Depends(verify_shopper_token)):
+    """Check if merchant is in shopper's finds"""
+    try:
+        existing = await db.finds.find_one({
+            "shopperId": shopper_data['shopper_id'],
+            "merchantId": merchant_id
+        })
+        
+        return {"saved": existing is not None}
+    except Exception as e:
+        logging.error(f"Error checking find: {str(e)}")
+        return {"saved": False}
+
+
+# ========== TRENDING & DISCOVERY ENDPOINTS ==========
+
+@api_router.get("/merchants/trending")
+async def get_trending_merchants():
+    """Get trending merchants based on clicks and saves"""
+    try:
+        # Get approved merchants sorted by engagement
+        merchants = await db.merchants.find(
+            {"status": "approved"}
+        ).sort([("clicks", -1), ("saves", -1)]).limit(6).to_list(6)
+        
+        return [Merchant(**m) for m in merchants]
+    except Exception as e:
+        logging.error(f"Error fetching trending merchants: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch trending merchants")
+
+
+@api_router.get("/merchants/recent")
+async def get_recent_merchants():
+    """Get recently added merchants"""
+    try:
+        merchants = await db.merchants.find(
+            {"status": "approved"}
+        ).sort("createdAt", -1).limit(6).to_list(6)
+        
+        return [Merchant(**m) for m in merchants]
+    except Exception as e:
+        logging.error(f"Error fetching recent merchants: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch recent merchants")
+
+
 # ========== MERCHANT ACCOUNT ENDPOINTS ==========
 
 @api_router.post("/merchant/register", status_code=201)
