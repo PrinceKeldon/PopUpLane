@@ -263,12 +263,118 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Merchants Table */}
-        <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
-              Merchant Management
-            </h2>
+        {/* Merchant Accounts Section */}
+        {activeSection === 'accounts' && (
+          <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                Merchant Account Approval
+              </h2>
+              
+              <div className="flex gap-2">
+                {['pending_approval', 'active', 'rejected'].map(status => (
+                  <Button
+                    key={status}
+                    onClick={() => setActiveTab(status)}
+                    variant={activeTab === status ? 'default' : 'outline'}
+                    style={{
+                      backgroundColor: activeTab === status ? '#3A7BD5' : 'transparent',
+                      color: activeTab === status ? '#FAFAFA' : '#111',
+                      borderColor: '#e5e5e5'
+                    }}
+                  >
+                    {status.replace('_', ' ').charAt(0).toUpperCase() + status.replace('_', ' ').slice(1)}
+                    {stats && (
+                      <span className="ml-2">
+                        ({status === 'pending_approval' ? stats.merchantAccounts?.pending : 
+                           status === 'active' ? stats.merchantAccounts?.active : 
+                           stats.merchantAccounts?.rejected || 0})
+                      </span>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {merchantAccounts.filter(acc => acc.accountStatus === activeTab).length === 0 ? (
+                <p className="text-center py-8" style={{ color: '#666' }}>
+                  No merchant accounts in this category.
+                </p>
+              ) : (
+                merchantAccounts.filter(acc => acc.accountStatus === activeTab).map(account => (
+                  <div
+                    key={account.id}
+                    className="p-4 rounded-lg border flex items-start justify-between"
+                    style={{ borderColor: '#e5e5e5', backgroundColor: '#FFF' }}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                          {account.businessName}
+                        </h3>
+                        <Badge
+                          style={{
+                            backgroundColor: 
+                              account.accountStatus === 'active' ? 'rgba(34, 197, 94, 0.1)' :
+                              account.accountStatus === 'pending_approval' ? 'rgba(234, 179, 8, 0.1)' :
+                              'rgba(239, 68, 68, 0.1)',
+                            color:
+                              account.accountStatus === 'active' ? '#22c55e' :
+                              account.accountStatus === 'pending_approval' ? '#eab308' :
+                              '#ef4444'
+                          }}
+                        >
+                          {account.accountStatus.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 text-sm" style={{ color: '#666' }}>
+                        <p><strong>Contact:</strong> {account.contactName}</p>
+                        <p><strong>Email:</strong> {account.email}</p>
+                        {account.phone && <p><strong>Phone:</strong> {account.phone}</p>}
+                        {account.website && <p><strong>Website:</strong> {account.website}</p>}
+                        {account.description && <p className="mt-2"><strong>Description:</strong> {account.description}</p>}
+                        <p className="text-xs" style={{ color: '#999' }}>
+                          Registered: {new Date(account.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {account.accountStatus === 'pending_approval' && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAccountStatusUpdate(account.id, 'active')}
+                          style={{ backgroundColor: '#22c55e', color: '#FFF' }}
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAccountStatusUpdate(account.id, 'rejected')}
+                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Deals Management Section */}
+        {activeSection === 'deals' && (
+          <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                Deal Management
+              </h2>
             
             {/* Tabs */}
             <div className="flex gap-2">
