@@ -789,12 +789,12 @@ async def generate_podcast(
         await db.podcasts.insert_one(podcast.dict())
         
         return {
-            \"id\": podcast.id,
-            \"title\": title,
-            \"audioUrl\": audio_url,
-            \"transcript\": transcript,
-            \"duration\": duration,
-            \"message\": \"Podcast generated successfully!\"
+            "id": podcast.id,
+            "title": title,
+            "audioUrl": audio_url,
+            "transcript": transcript,
+            "duration": duration,
+            "message": "Podcast generated successfully!"
         }
     
     except Exception as e:
