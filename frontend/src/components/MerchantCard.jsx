@@ -236,6 +236,58 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         </div>
       </div>
 
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent style={{ backgroundColor: '#FAFAFA' }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+              Share {merchant.brandName}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-4">
+            <Button onClick={handleShareInstagram} className="w-full justify-start" variant="outline">
+              <Instagram className="mr-3 h-5 w-5" style={{ color: '#E4405F' }} />
+              Share on Instagram
+            </Button>
+            <Button onClick={handleShareTwitter} className="w-full justify-start" variant="outline">
+              <Twitter className="mr-3 h-5 w-5" style={{ color: '#1DA1F2' }} />
+              Share on Twitter
+            </Button>
+            <Button onClick={handleShareFacebook} className="w-full justify-start" variant="outline">
+              <Facebook className="mr-3 h-5 w-5" style={{ color: '#4267B2' }} />
+              Share on Facebook
+            </Button>
+            <Button onClick={handleShareEmail} className="w-full justify-start" variant="outline">
+              <Mail className="mr-3 h-5 w-5" style={{ color: '#666' }} />
+              Share via Email
+            </Button>
+            <Button onClick={handleCopyLink} className="w-full justify-start" variant="outline">
+              <Copy className="mr-3 h-5 w-5" style={{ color: '#666' }} />
+              Copy Link
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Story Dialog */}
+      {merchant.story && (
+        <Dialog open={showStoryDialog} onOpenChange={setShowStoryDialog}>
+          <DialogContent style={{ backgroundColor: '#FAFAFA', maxWidth: '600px' }}>
+            <DialogHeader>
+              <DialogTitle style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                {merchant.brandName} - Our Story
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <img src={merchant.imageUrl} alt={merchant.brandName} className="w-full h-48 object-cover rounded-lg mb-4" />
+              <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#444' }}>
+                {merchant.story}
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <style jsx>{`
         @keyframes pulse {
           0%, 100% {
