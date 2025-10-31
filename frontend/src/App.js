@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 import MerchantSubmission from "./pages/MerchantSubmission";
 import MerchantSignIn from "./pages/MerchantSignIn";
 import MerchantRegister from "./pages/MerchantRegister";
+import MerchantDashboard from "./pages/MerchantDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import { Toaster } from "./components/ui/toaster";
