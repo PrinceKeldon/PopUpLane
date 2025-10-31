@@ -66,7 +66,17 @@ const MinimalistHero = ({ onGetNotified, onExplore }) => {
 
       {/* Content Container */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white px-4 text-center">
-        {/* Countdown Timer - Positioned at top */}
+        {/* Dominant 3D Title */}
+        <div className="mb-8 logo-3d">
+          <h1 className="popup-text text-7xl md:text-8xl lg:text-9xl font-black leading-none" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            PopUp
+          </h1>
+          <h1 className="lane-text text-7xl md:text-8xl lg:text-9xl font-black leading-none" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            Lane
+          </h1>
+        </div>
+
+        {/* Countdown Timer */}
         <div className="mb-12">
           <p className="text-sm md:text-lg font-light tracking-wide mb-4 uppercase">
             Lane Opens In:
