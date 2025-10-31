@@ -230,6 +230,289 @@ async def update_settings(
         raise HTTPException(status_code=500, detail="Failed to update settings")
 
 
+# ========== MERCHANT ACCOUNT ENDPOINTS ==========
+
+@api_router.post("/merchant/register", status_code=201)
+async def register_merchant(account_data: MerchantAccountCreate):
+    """Register new merchant account"""
+    try:
+        # Check if email already exists
+        existing = await db.merchant_accounts.find_one({"email": account_data.email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Hash password
+        password_hash = hash_password(account_data.password)
+        
+        # Create account
+        account_dict = account_data.dict(exclude={'password'})
+        account_dict['passwordHash'] = password_hash
+        account = MerchantAccount(**account_dict)
+        
+        await db.merchant_accounts.insert_one(account.dict())
+        
+        return {
+            "id": account.id,
+            "message": "Account created successfully. Pending admin approval."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error registering merchant: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to register merchant")
+
+
+@api_router.post("/merchant/login")
+async def merchant_login(credentials: MerchantAccountLogin):
+    """Merchant authentication"""
+    try:
+        # Find merchant account
+        account = await db.merchant_accounts.find_one({"email": credentials.email})
+        if not account:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Verify password
+        if not verify_password(credentials.password, account['passwordHash']):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Check account status
+        if account['accountStatus'] == MerchantAccountStatus.PENDING_APPROVAL:
+            raise HTTPException(
+                status_code=403,
+                detail="Your account is pending approval. We'll notify you once approved."
+            )
+        
+        if account['accountStatus'] == MerchantAccountStatus.REJECTED:
+            reason = account.get('rejectionReason', 'No reason provided')
+            raise HTTPException(
+                status_code=403,
+                detail=f"Your account was not approved. Reason: {reason}"
+            )
+        
+        # Create token
+        token_data = create_merchant_token(account['id'], account['email'])
+        
+        # Return account info (without password hash)
+        account_obj = MerchantAccount(**account)
+        account_dict = account_obj.dict(exclude={'passwordHash'})
+        
+        return {
+            **token_data,
+            "merchantAccount": account_dict
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error during merchant login: {str(e)}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+
+@api_router.get("/merchant/profile")
+async def get_merchant_profile(merchant_data: dict = Depends(verify_merchant_token)):
+    """Get current merchant's profile"""
+    try:
+        account = await db.merchant_accounts.find_one({"id": merchant_data['merchant_id']})
+        if not account:
+            raise HTTPException(status_code=404, detail="Merchant account not found")
+        
+        account_obj = MerchantAccount(**account)
+        return account_obj.dict(exclude={'passwordHash'})
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching merchant profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch profile")
+
+
+@api_router.patch("/merchant/profile")
+async def update_merchant_profile(
+    updates: MerchantAccountUpdate,
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Update merchant profile"""
+    try:
+        update_data = {k: v for k, v in updates.dict().items() if v is not None}
+        update_data['updatedAt'] = datetime.utcnow()
+        
+        result = await db.merchant_accounts.update_one(
+            {"id": merchant_data['merchant_id']},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Merchant account not found")
+        
+        return {"message": "Profile updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating merchant profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update profile")
+
+
+# ========== MERCHANT DEAL ENDPOINTS ==========
+
+@api_router.post("/merchant/deals", status_code=201)
+async def create_merchant_deal(
+    brandName: str = Form(...),
+    tagline: str = Form(...),
+    description: str = Form(...),
+    discount: str = Form(...),
+    category: str = Form(...),
+    externalUrl: str = Form(...),
+    story: str = Form(None),
+    mainImage: UploadFile = File(...),
+    additionalImages: List[UploadFile] = File(None),
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Submit new deal with image uploads"""
+    try:
+        merchant_id = merchant_data['merchant_id']
+        deal_id = str(uuid.uuid4())
+        
+        # Save main image
+        main_image_path, main_image_size = await save_upload_file(mainImage, merchant_id, deal_id)
+        
+        # Record main image upload
+        main_upload = FileUpload(
+            merchantAccountId=merchant_id,
+            dealId=deal_id,
+            filename=mainImage.filename,
+            storedPath=main_image_path,
+            fileSize=main_image_size,
+            mimeType=mainImage.content_type
+        )
+        await db.uploads.insert_one(main_upload.dict())
+        
+        # Save additional images
+        additional_image_paths = []
+        if additionalImages:
+            for img in additionalImages[:4]:  # Max 4 additional images
+                if img.filename:
+                    img_path, img_size = await save_upload_file(img, merchant_id, deal_id)
+                    additional_image_paths.append(img_path)
+                    
+                    # Record upload
+                    upload = FileUpload(
+                        merchantAccountId=merchant_id,
+                        dealId=deal_id,
+                        filename=img.filename,
+                        storedPath=img_path,
+                        fileSize=img_size,
+                        mimeType=img.content_type
+                    )
+                    await db.uploads.insert_one(upload.dict())
+        
+        # Get merchant account for email
+        account = await db.merchant_accounts.find_one({"id": merchant_id})
+        
+        # Create deal
+        deal_data = {
+            'id': deal_id,
+            'merchantAccountId': merchant_id,
+            'brandName': brandName,
+            'tagline': tagline,
+            'description': description,
+            'discount': discount,
+            'category': category,
+            'imageUrl': main_image_path,
+            'additionalImages': additional_image_paths,
+            'externalUrl': externalUrl,
+            'email': account['email'],
+            'story': story,
+            'badges': assign_badges({'description': description, 'story': story, 'category': category})
+        }
+        
+        deal = Merchant(**deal_data)
+        await db.merchants.insert_one(deal.dict())
+        
+        return {
+            "id": deal.id,
+            "status": deal.status,
+            "message": "Deal submitted successfully. Awaiting approval."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error creating merchant deal: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to submit deal")
+
+
+@api_router.get("/merchant/deals")
+async def get_merchant_deals(merchant_data: dict = Depends(verify_merchant_token)):
+    """Get all deals for current merchant"""
+    try:
+        deals = await db.merchants.find({"merchantAccountId": merchant_data['merchant_id']}).to_list(1000)
+        return [Merchant(**deal) for deal in deals]
+    except Exception as e:
+        logging.error(f"Error fetching merchant deals: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch deals")
+
+
+# ========== FILE UPLOAD ENDPOINTS ==========
+
+@api_router.post("/merchant/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Upload a single image file"""
+    try:
+        merchant_id = merchant_data['merchant_id']
+        file_path, file_size = await save_upload_file(file, merchant_id)
+        
+        # Record upload
+        upload = FileUpload(
+            merchantAccountId=merchant_id,
+            filename=file.filename,
+            storedPath=file_path,
+            fileSize=file_size,
+            mimeType=file.content_type
+        )
+        await db.uploads.insert_one(upload.dict())
+        
+        return {
+            "url": file_path,
+            "fileId": upload.id,
+            "message": "File uploaded successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error uploading file: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to upload file")
+
+
+@api_router.delete("/merchant/upload/{file_id}")
+async def delete_file(
+    file_id: str,
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Delete an uploaded file"""
+    try:
+        # Find upload record
+        upload = await db.uploads.find_one({
+            "id": file_id,
+            "merchantAccountId": merchant_data['merchant_id']
+        })
+        
+        if not upload:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Delete physical file
+        delete_upload_file(upload['storedPath'])
+        
+        # Delete database record
+        await db.uploads.delete_one({"id": file_id})
+        
+        return {"message": "File deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting file: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete file")
+
+
 # ========== ADMIN ENDPOINTS ==========
 
 @api_router.post("/admin/login", response_model=AdminToken)
