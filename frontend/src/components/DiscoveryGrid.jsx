@@ -4,6 +4,7 @@ import MerchantCard from './MerchantCard';
 import { CATEGORIES } from '../data/mock';
 import { merchantsAPI } from '../api/client';
 import { toast } from '../hooks/use-toast';
+import axios from 'axios';
 
 const DiscoveryGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
