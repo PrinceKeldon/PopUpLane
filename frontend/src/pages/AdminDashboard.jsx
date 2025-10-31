@@ -232,6 +232,24 @@ const AdminDashboard = () => {
             <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm mb-1" style={{ color: '#666' }}>Merchant Accounts</p>
+                  <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                    {stats.merchantAccounts?.total || 0}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255, 79, 129, 0.1)' }}>
+                  <UserCheck className="h-6 w-6" style={{ color: '#FF4F81' }} />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-4 text-xs">
+                <span style={{ color: '#666' }}>Pending: {stats.merchantAccounts?.pending || 0}</span>
+                <span style={{ color: '#666' }}>Active: {stats.merchantAccounts?.active || 0}</span>
+              </div>
+            </Card>
+
+            <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm mb-1" style={{ color: '#666' }}>Lane Status</p>
                   <p className="text-xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
                     {stats.laneStatus.replace('_', ' ').toUpperCase()}
