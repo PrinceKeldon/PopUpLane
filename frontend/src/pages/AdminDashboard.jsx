@@ -11,7 +11,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [merchants, setMerchants] = useState([]);
+  const [merchantAccounts, setMerchantAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState('deals'); // 'deals' or 'accounts'
   const [activeTab, setActiveTab] = useState('pending');
 
   useEffect(() => {
