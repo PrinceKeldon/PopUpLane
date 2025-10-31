@@ -49,6 +49,14 @@ const AdminDashboard = () => {
       ];
       setMerchants(allMerchants);
 
+      // Fetch merchant accounts
+      const accountsResponse = await axios.get(`${BACKEND_URL}/api/admin/merchant-accounts`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      });
+      setMerchantAccounts(accountsResponse.data);
+
     } catch (error) {
       console.error('Error fetching data:', error);
       if (error.response?.status === 401 || error.response?.status === 403) {
