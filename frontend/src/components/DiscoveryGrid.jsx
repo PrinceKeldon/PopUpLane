@@ -56,24 +56,45 @@ const DiscoveryGrid = () => {
   };
 
   const handleSave = async (merchant) => {
-    const isSaved = savedMerchants.includes(merchant.id);
-    
-    if (!isSaved) {
-      // Track save
-      try {
-        await merchantsAPI.trackSave(merchant.id);
-      } catch (error) {
-        console.error('Failed to track save:', error);
-      }
+    // Check if shopper is logged in
+    const token = localStorage.getItem('shopper_token');
+    if (!token) {
+      toast({
+        title: 'Sign in Required',
+        description: 'Please sign in to save finds',
+        variant: 'destructive'
+      });
+      // Redirect to shopper signin
+      window.location.href = '/shopper/signin';
+      return;
     }
 
-    setSavedMerchants(prev => {
+    const isSaved = savedMerchants.includes(merchant.id);
+    
+    try {
       if (isSaved) {
-        return prev.filter(id => id !== merchant.id);
+        // Remove from saves
+        await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/shopper/finds/${merchant.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setSavedMerchants(prev => prev.filter(id => id !== merchant.id));
+        toast({ title: 'Removed', description: 'Removed from your finds' });
       } else {
-        return [...prev, merchant.id];
+        // Add to saves
+        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/shopper/finds/${merchant.id}`, {}, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setSavedMerchants(prev => [...prev, merchant.id]);
+        toast({ title: 'Saved!', description: 'Added to your finds' });
       }
-    });
+    } catch (error) {
+      console.error('Failed to save:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update saves',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (loading) {
