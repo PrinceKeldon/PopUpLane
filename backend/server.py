@@ -594,22 +594,34 @@ async def get_dashboard_stats(authorized: bool = Depends(verify_admin_token)):
         # Count shoppers
         total_shoppers = await db.shoppers.count_documents({})
         
+        # Count merchant accounts
+        total_accounts = await db.merchant_accounts.count_documents({})
+        pending_accounts = await db.merchant_accounts.count_documents({"accountStatus": "pending_approval"})
+        active_accounts = await db.merchant_accounts.count_documents({"accountStatus": "active"})
+        rejected_accounts = await db.merchant_accounts.count_documents({"accountStatus": "rejected"})
+        
         # Get lane status
         settings = await db.settings.find_one({"id": "main_settings"})
         lane_status = settings.get('status', 'coming_soon') if settings else 'coming_soon'
         
-        return DashboardStats(
-            merchants={
+        return {
+            "merchants": {
                 "total": total_merchants,
                 "pending": pending_merchants,
                 "approved": approved_merchants,
                 "rejected": rejected_merchants
             },
-            shoppers={
+            "merchantAccounts": {
+                "total": total_accounts,
+                "pending": pending_accounts,
+                "active": active_accounts,
+                "rejected": rejected_accounts
+            },
+            "shoppers": {
                 "total": total_shoppers
             },
-            laneStatus=lane_status
-        )
+            "laneStatus": lane_status
+        }
     except Exception as e:
         logging.error(f"Error fetching dashboard stats: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch dashboard stats")
