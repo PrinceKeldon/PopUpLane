@@ -320,38 +320,89 @@ const MerchantSubmission = () => {
               </select>
             </div>
 
-            {/* Main Image URL */}
+            {/* Main Image Upload */}
             <div>
-              <Label htmlFor="imageUrl" className="text-base font-semibold mb-2" style={{ color: '#111' }}>
-                Main Product Image URL *
+              <Label htmlFor="mainImage" className="text-base font-semibold mb-2" style={{ color: '#111' }}>
+                Main Product Image *
               </Label>
-              <Input
-                id="imageUrl"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleChange}
-                placeholder="https://example.com/product-image.jpg"
-                className="mt-2"
-                type="url"
-                required
-              />
-              <p className="text-xs mt-1" style={{ color: '#666' }}>Provide a direct URL to your product image</p>
+              <div className="mt-2">
+                {mainImagePreview ? (
+                  <div className="relative inline-block">
+                    <img src={mainImagePreview} alt="Main preview" className="w-64 h-64 object-cover rounded-lg" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        setMainImage(null);
+                        setMainImagePreview(null);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label 
+                    htmlFor="mainImage" 
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50"
+                    style={{ borderColor: '#e5e5e5' }}
+                  >
+                    <Upload className="h-12 w-12 mb-2" style={{ color: '#3A7BD5' }} />
+                    <p className="text-sm" style={{ color: '#666' }}>Click to upload main image</p>
+                    <p className="text-xs mt-1" style={{ color: '#999' }}>PNG, JPG, WEBP (Max 5MB)</p>
+                  </label>
+                )}
+                <Input
+                  id="mainImage"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleMainImageChange}
+                  className="hidden"
+                  required={!mainImage}
+                />
+              </div>
             </div>
 
-            {/* Additional Images */}
+            {/* Additional Images Upload */}
             <div>
               <Label className="text-base font-semibold mb-2" style={{ color: '#111' }}>
                 Additional Images (Optional, up to 4)
               </Label>
-              <div className="space-y-2 mt-2">
-                {formData.additionalImages.map((img, index) => (
-                  <Input
-                    key={index}
-                    value={img}
-                    onChange={(e) => handleAdditionalImageChange(index, e.target.value)}
-                    placeholder={`Image ${index + 2} URL`}
-                    type="url"
-                  />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                {additionalImagePreviews.map((preview, index) => (
+                  <div key={index}>
+                    {preview ? (
+                      <div className="relative">
+                        <img src={preview} alt={`Additional ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1"
+                          onClick={() => removeAdditionalImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label 
+                        htmlFor={`additionalImage${index}`}
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50"
+                        style={{ borderColor: '#e5e5e5' }}
+                      >
+                        <Upload className="h-6 w-6 mb-1" style={{ color: '#3A7BD5' }} />
+                        <p className="text-xs" style={{ color: '#666' }}>Upload</p>
+                      </label>
+                    )}
+                    <Input
+                      id={`additionalImage${index}`}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={(e) => handleAdditionalImageChange(index, e)}
+                      className="hidden"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
