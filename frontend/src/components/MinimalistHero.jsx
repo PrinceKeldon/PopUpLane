@@ -85,13 +85,13 @@ const MinimalistHero = ({ onGetNotified, onExplore }) => {
         </div>
 
         {/* Headline */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in-up" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in-up" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
           Beat the Black Friday Chaos{' '}
           <span className="text-yellow-400">Discover Real Deals</span> Before the Rush.
         </h1>
 
         {/* Subheadline */}
-        <p className="text-lg md:text-xl lg:text-2xl font-medium mb-10 max-w-3xl animate-fade-in-up delay-200">
+        <p className="text-base md:text-lg lg:text-xl font-medium mb-8 max-w-3xl animate-fade-in-up delay-200">
           Curated deals from <span className="font-bold text-pink-400">small brands, indie merchants, and creators</span> who don't have big ad budgets – the ones you actually want to find before the noise hits.
         </p>
 
