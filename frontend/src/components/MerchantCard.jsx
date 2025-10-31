@@ -25,6 +25,38 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
     setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
   };
 
+  const handleShareInstagram = () => {
+    // Instagram doesn't support direct sharing via URL, copy link instead
+    navigator.clipboard.writeText(shareUrl);
+    toast({ title: 'Link Copied!', description: 'Share it on Instagram Stories or feed!' });
+    setShowShareDialog(false);
+  };
+
+  const handleShareTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(url, '_blank');
+    setShowShareDialog(false);
+  };
+
+  const handleShareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    window.open(url, '_blank');
+    setShowShareDialog(false);
+  };
+
+  const handleShareEmail = () => {
+    const subject = `Check out ${merchant.brandName} on PopUp Lane`;
+    const body = `${shareText}\n\n${merchant.description}\n\nVisit: ${shareUrl}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setShowShareDialog(false);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast({ title: 'Link Copied!', description: 'Share link copied to clipboard' });
+    setShowShareDialog(false);
+  };
+
   return (
     <Card className="merchant-card overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl" style={{ backgroundColor: '#FAFAFA', border: '1px solid #e5e5e5' }}>
       {/* Main Image with Navigation */}
