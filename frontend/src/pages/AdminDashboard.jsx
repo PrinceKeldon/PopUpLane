@@ -83,7 +83,7 @@ const AdminDashboard = () => {
       
       toast({
         title: 'Success!',
-        description: `Merchant ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully.`,
+        description: `Deal ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully.`,
       });
 
       // Refresh data
@@ -93,7 +93,37 @@ const AdminDashboard = () => {
       console.error('Error updating status:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update merchant status.',
+        description: 'Failed to update deal status.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleAccountStatusUpdate = async (accountId, newStatus) => {
+    try {
+      await axios.patch(
+        `${BACKEND_URL}/api/admin/merchant-accounts/${accountId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          }
+        }
+      );
+      
+      toast({
+        title: 'Success!',
+        description: `Account ${newStatus === 'active' ? 'approved' : 'rejected'} successfully.`,
+      });
+
+      // Refresh data
+      fetchData();
+
+    } catch (error) {
+      console.error('Error updating account status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update account status.',
         variant: 'destructive'
       });
     }
