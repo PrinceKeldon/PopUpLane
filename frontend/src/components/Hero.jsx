@@ -6,8 +6,57 @@ import { LANE_CONFIG } from '../data/mock';
 import { useNavigate } from 'react-router-dom';
 
 const Hero = ({ onGetNotified, onExplore }) => {
+  const navigate = useNavigate();
+  const [shopperAccount, setShopperAccount] = useState(null);
+
+  useEffect(() => {
+    const accountData = localStorage.getItem('shopper_account');
+    if (accountData) {
+      setShopperAccount(JSON.parse(accountData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('shopper_token');
+    localStorage.removeItem('shopper_account');
+    setShopperAccount(null);
+    window.location.reload();
+  };
+
   return (
     <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#111' }}>
+      {/* User Menu */}
+      {shopperAccount ? (
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-3">
+          <Button
+            onClick={() => navigate('/my-finds')}
+            variant="ghost"
+            style={{ color: '#FAFAFA' }}
+          >
+            <Heart className="mr-2 h-4 w-4" />
+            My Finds
+          </Button>
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            style={{ color: '#FAFAFA' }}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      ) : (
+        <div className="absolute top-6 right-6 z-20 flex items-center gap-3">
+          <Button
+            onClick={() => navigate('/shopper/signin')}
+            variant="ghost"
+            style={{ color: '#FAFAFA' }}
+          >
+            <User className="mr-2 h-4 w-4" />
+            Sign In
+          </Button>
+        </div>
+      )}
+
       {/* Subtle animated background */}
       <div className="absolute inset-0 opacity-20">
         <div className="lane-lights"></div>
