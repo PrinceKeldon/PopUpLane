@@ -729,6 +729,162 @@ async def delete_file(
         raise HTTPException(status_code=500, detail="Failed to delete file")
 
 
+# ========== PODCAST GENERATION ENDPOINTS ==========
+
+@api_router.post("/merchant/podcast/generate", status_code=201)
+async def generate_podcast(
+    request: PodcastGenerateRequest,
+    background_tasks: BackgroundTasks,
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Generate AI podcast episode"""
+    try:
+        merchant_id = merchant_data['merchant_id']
+        episode_id = str(uuid.uuid4())
+        
+        # Generate script based on episode type
+        if request.episodeType == \"founder_story\":
+            title, script = generate_founder_story_script(
+                brand_name=request.brandName,
+                founder_name=request.founderName,
+                brand_story=request.brandStory,
+                mission=request.mission or \"Creating amazing products\"
+            )
+        else:  # drop_episode
+            title, script = generate_drop_episode_script(
+                product_name=request.productName,
+                description=request.productDescription,
+                features=request.productFeatures or \"\",
+                price=request.productPrice,
+                discount=request.discount,
+                brand_name=request.brandName
+            )
+        
+        # Generate audio
+        audio_url, duration = await generate_audio_from_script(script, merchant_id, episode_id)
+        
+        # Format transcript
+        transcript = format_transcript(script, title)
+        
+        # Create podcast record
+        podcast = Podcast(
+            id=episode_id,
+            merchantId=merchant_id,
+            merchantAccountId=request.merchantId,
+            dealId=request.dealId,
+            episodeType=request.episodeType,
+            title=title,
+            script=script,
+            transcript=transcript,
+            audioUrl=audio_url,
+            duration=duration
+        )
+        
+        # Save to database
+        await db.podcasts.insert_one(podcast.dict())
+        
+        return {
+            \"id\": podcast.id,
+            \"title\": title,
+            \"audioUrl\": audio_url,
+            \"transcript\": transcript,
+            \"duration\": duration,
+            \"message\": \"Podcast generated successfully!\"
+        }
+    
+    except Exception as e:
+        logging.error(f\"Error generating podcast: {str(e)}\")
+        raise HTTPException(status_code=500, detail=f\"Failed to generate podcast: {str(e)}\")
+
+
+@api_router.get(\"/merchant/podcasts\")
+async def get_merchant_podcasts(merchant_data: dict = Depends(verify_merchant_token)):
+    \"\"\"Get all podcasts for merchant\"\"\"
+    try:
+        podcasts = await db.podcasts.find({\"merchantAccountId\": merchant_data['merchant_id']}).to_list(1000)
+        return [PodcastResponse(**p) for p in podcasts]
+    except Exception as e:
+        logging.error(f\"Error fetching podcasts: {str(e)}\")
+        raise HTTPException(status_code=500, detail=\"Failed to fetch podcasts\")
+
+
+@api_router.get(\"/podcasts/{podcast_id}\", response_model=PodcastResponse)
+async def get_podcast(podcast_id: str):
+    \"\"\"Get podcast by ID (public)\"\"\"
+    try:
+        podcast = await db.podcasts.find_one({\"id\": podcast_id})
+        if not podcast:
+            raise HTTPException(status_code=404, detail=\"Podcast not found\")
+        
+        return PodcastResponse(**podcast)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f\"Error fetching podcast: {str(e)}\")
+        raise HTTPException(status_code=500, detail=\"Failed to fetch podcast\")
+
+
+@api_router.get(\"/merchants/{merchant_id}/founder-story\")
+async def get_founder_story(merchant_id: str):
+    \"\"\"Get founder story podcast for a merchant (public)\"\"\"
+    try:
+        podcast = await db.podcasts.find_one({
+            \"merchantAccountId\": merchant_id,
+            \"episodeType\": \"founder_story\",
+            \"status\": \"active\"
+        })
+        
+        if not podcast:
+            return None
+        
+        return PodcastResponse(**podcast)
+    except Exception as e:
+        logging.error(f\"Error fetching founder story: {str(e)}\")
+        return None
+
+
+@api_router.get(\"/deals/{deal_id}/drop-episode\")
+async def get_drop_episode(deal_id: str):
+    \"\"\"Get drop episode for a deal (public)\"\"\"
+    try:
+        podcast = await db.podcasts.find_one({
+            \"dealId\": deal_id,
+            \"episodeType\": \"drop_episode\",
+            \"status\": \"active\"
+        })
+        
+        if not podcast:
+            return None
+        
+        return PodcastResponse(**podcast)
+    except Exception as e:
+        logging.error(f\"Error fetching drop episode: {str(e)}\")
+        return None
+
+
+@api_router.delete(\"/merchant/podcasts/{podcast_id}\")
+async def delete_podcast(
+    podcast_id: str,
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    \"\"\"Delete/archive a podcast\"\"\"
+    try:
+        result = await db.podcasts.update_one(
+            {\"id\": podcast_id, \"merchantAccountId\": merchant_data['merchant_id']},
+            {\"$set\": {\"status\": \"archived\"}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail=\"Podcast not found\")
+        
+        return {\"message\": \"Podcast archived successfully\"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f\"Error deleting podcast: {str(e)}\")
+        raise HTTPException(status_code=500, detail=\"Failed to delete podcast\")
+
+
 # ========== ADMIN ENDPOINTS ==========
 
 @api_router.post("/admin/login", response_model=AdminToken)
