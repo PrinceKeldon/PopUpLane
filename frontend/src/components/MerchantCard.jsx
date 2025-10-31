@@ -8,7 +8,12 @@ import { toast } from '../hooks/use-toast';
 
 const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showStoryDialog, setShowStoryDialog] = useState(false);
   const allImages = [merchant.imageUrl, ...(merchant.additionalImages || [])];
+  
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}?merchant=${merchant.id}` : '';
+  const shareText = `Check out ${merchant.brandName} - ${merchant.discount} on PopUp Lane!`;
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
