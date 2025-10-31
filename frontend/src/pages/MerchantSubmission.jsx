@@ -425,23 +425,6 @@ const MerchantSubmission = () => {
               <p className="text-xs mt-1" style={{ color: '#666' }}>Where should shoppers go to purchase?</p>
             </div>
 
-            {/* Email */}
-            <div>
-              <Label htmlFor="email" className="text-base font-semibold mb-2" style={{ color: '#111' }}>
-                Contact Email *
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="hello@yourbrand.com"
-                className="mt-2"
-                type="email"
-                required
-              />
-            </div>
-
             {/* Brand Story */}
             <div>
               <Label htmlFor="story" className="text-base font-semibold mb-2" style={{ color: '#111' }}>
