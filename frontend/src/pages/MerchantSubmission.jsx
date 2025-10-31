@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { toast } from '../hooks/use-toast';
-import { merchantsAPI } from '../api/client';
-import { ArrowLeft, Sparkles, Upload } from 'lucide-react';
+import { ArrowLeft, Sparkles, Upload, X, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const MerchantSubmission = () => {
   const navigate = useNavigate();
