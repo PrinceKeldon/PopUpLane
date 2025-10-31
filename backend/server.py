@@ -802,15 +802,15 @@ async def generate_podcast(
         raise HTTPException(status_code=500, detail=f\"Failed to generate podcast: {str(e)}\")
 
 
-@api_router.get(\"/merchant/podcasts\")
+@api_router.get("/merchant/podcasts")
 async def get_merchant_podcasts(merchant_data: dict = Depends(verify_merchant_token)):
-    \"\"\"Get all podcasts for merchant\"\"\"
+    """Get all podcasts for merchant"""
     try:
-        podcasts = await db.podcasts.find({\"merchantAccountId\": merchant_data['merchant_id']}).to_list(1000)
+        podcasts = await db.podcasts.find({"merchantAccountId": merchant_data['merchant_id']}).to_list(1000)
         return [PodcastResponse(**p) for p in podcasts]
     except Exception as e:
-        logging.error(f\"Error fetching podcasts: {str(e)}\")
-        raise HTTPException(status_code=500, detail=\"Failed to fetch podcasts\")
+        logging.error(f"Error fetching podcasts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch podcasts")
 
 
 @api_router.get(\"/podcasts/{podcast_id}\", response_model=PodcastResponse)
