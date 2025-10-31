@@ -113,10 +113,10 @@ const MerchantSubmission = () => {
     e.preventDefault();
 
     // Validation
-    if (!formData.brandName || !formData.tagline || !formData.description || !formData.discount || !formData.imageUrl || !formData.externalUrl || !formData.email) {
+    if (!formData.brandName || !formData.tagline || !formData.description || !formData.discount || !mainImage || !formData.externalUrl) {
       toast({
         title: 'Missing Information',
-        description: 'Please fill in all required fields.',
+        description: 'Please fill in all required fields and upload a main image.',
         variant: 'destructive'
       });
       return;
@@ -125,17 +125,41 @@ const MerchantSubmission = () => {
     setIsSubmitting(true);
 
     try {
-      // Filter out empty additional images
-      const cleanedData = {
-        ...formData,
-        additionalImages: formData.additionalImages.filter(img => img.trim() !== '')
-      };
+      // Create FormData for multipart upload
+      const submitData = new FormData();
+      submitData.append('brandName', formData.brandName);
+      submitData.append('tagline', formData.tagline);
+      submitData.append('description', formData.description);
+      submitData.append('discount', formData.discount);
+      submitData.append('category', formData.category);
+      submitData.append('externalUrl', formData.externalUrl);
+      if (formData.story) {
+        submitData.append('story', formData.story);
+      }
+      
+      // Append main image
+      submitData.append('mainImage', mainImage);
+      
+      // Append additional images
+      additionalImages.forEach((img) => {
+        if (img) {
+          submitData.append('additionalImages', img);
+        }
+      });
 
-      const response = await merchantsAPI.create(cleanedData);
+      // Get token
+      const token = localStorage.getItem('merchant_token');
+
+      const response = await axios.post(`${API}/merchant/deals`, submitData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       toast({
         title: 'Success!',
-        description: response.data.message || 'Your submission has been received!',
+        description: response.data.message || 'Your deal has been submitted!',
       });
 
       // Reset form
@@ -145,12 +169,13 @@ const MerchantSubmission = () => {
         description: '',
         discount: '',
         category: 'Home',
-        imageUrl: '',
-        additionalImages: ['', '', '', ''],
         externalUrl: '',
-        email: '',
         story: ''
       });
+      setMainImage(null);
+      setMainImagePreview(null);
+      setAdditionalImages([null, null, null, null]);
+      setAdditionalImagePreviews([null, null, null, null]);
 
       // Navigate back to home after 2 seconds
       setTimeout(() => {
@@ -159,9 +184,10 @@ const MerchantSubmission = () => {
 
     } catch (error) {
       console.error('Submission error:', error);
+      const message = error.response?.data?.detail || 'Failed to submit. Please try again.';
       toast({
         title: 'Error',
-        description: 'Failed to submit. Please try again.',
+        description: message,
         variant: 'destructive'
       });
     } finally {
