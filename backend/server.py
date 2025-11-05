@@ -913,9 +913,10 @@ async def get_merchant_accounts(
             query['accountStatus'] = status
         
         accounts = await db.merchant_accounts.find(query).to_list(1000)
-        # Remove password hashes
+        # Remove password hashes and MongoDB _id field
         for account in accounts:
             account.pop('passwordHash', None)
+            account.pop('_id', None)
         return accounts
     except Exception as e:
         logging.error(f"Error fetching merchant accounts: {str(e)}")
