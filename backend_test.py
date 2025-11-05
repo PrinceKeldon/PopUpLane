@@ -79,10 +79,11 @@ def test_merchant_registration():
     
     # Use timestamp to make email unique
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    test_email = f"testmerchant_{timestamp}@example.com"
     merchant_data = {
         "businessName": "Test Store",
         "contactName": "John Doe", 
-        "email": f"testmerchant_{timestamp}@example.com",
+        "email": test_email,
         "password": "Test1234",
         "phone": "+1234567890",
         "website": "https://teststore.com",
@@ -96,10 +97,10 @@ def test_merchant_registration():
         print_success("Merchant registration successful!")
         print_info(f"Merchant ID: {response.get('id')}")
         print_info(f"Message: {response.get('message')}")
-        return response.get('id')
+        return response.get('id'), test_email
     else:
         print_error("Merchant registration failed!")
-        return None
+        return None, None
 
 def test_admin_login():
     """Test Step 2: Admin Login"""
