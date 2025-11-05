@@ -10,6 +10,7 @@ class MerchantAccountStatus(str, Enum):
     PENDING_APPROVAL = "pending_approval"
     ACTIVE = "active"
     REJECTED = "rejected"
+    SUSPENDED = "suspended"
 
 
 class MerchantAccountCreate(BaseModel):
