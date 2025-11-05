@@ -511,6 +511,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         }
       `}</style>
     </Card>
+    </>
   );
 };
 
