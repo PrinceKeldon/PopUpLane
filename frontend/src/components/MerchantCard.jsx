@@ -272,11 +272,11 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         )}
 
         {/* Stats */}
-        <div className="flex gap-4 mt-4 pt-4 border-t" style={{ borderColor: '#e5e5e5' }}>
-          <span className="text-xs" style={{ color: '#666' }}>
+        <div className="flex gap-4 mt-4 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+          <span className="text-xs" style={{ color: '#FFE4EC' }}>
             {merchant.saves} saves
           </span>
-          <span className="text-xs" style={{ color: '#666' }}>
+          <span className="text-xs" style={{ color: '#FFE4EC' }}>
             {merchant.clicks} clicks
           </span>
         </div>
