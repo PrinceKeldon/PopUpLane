@@ -302,7 +302,14 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
               </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <img src={merchant.imageUrl} alt={merchant.brandName} className="w-full h-48 object-cover rounded-lg mb-4" />
+              <img 
+                src={getImageUrl(merchant.imageUrl)} 
+                alt={merchant.brandName} 
+                className="w-full h-48 object-cover rounded-lg mb-4" 
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+                }}
+              />
               <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#444' }}>
                 {merchant.story}
               </p>
