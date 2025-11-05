@@ -3,14 +3,28 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { ExternalLink, Bookmark, ChevronLeft, ChevronRight, Share2, Instagram, Twitter, Facebook, Mail, Copy } from 'lucide-react';
+import { ExternalLink, Bookmark, ChevronLeft, ChevronRight, Share2, Instagram, Twitter, Facebook, Mail, Copy, X } from 'lucide-react';
 import { toast } from '../hooks/use-toast';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showStoryDialog, setShowStoryDialog] = useState(false);
-  const allImages = [merchant.imageUrl, ...(merchant.additionalImages || [])];
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  
+  // Helper function to get full image URL
+  const getImageUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${BACKEND_URL}${path}`;
+  };
+  
+  const allImages = [
+    getImageUrl(merchant.imageUrl), 
+    ...(merchant.additionalImages || []).map(img => getImageUrl(img))
+  ];
   
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}?merchant=${merchant.id}` : '';
   const shareText = `Check out ${merchant.brandName} - ${merchant.discount} on PopUp Lane!`;
