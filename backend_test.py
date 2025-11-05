@@ -289,13 +289,14 @@ def main():
     results = []
     merchant_id = None
     admin_token = None
+    test_email = None
     
     # Step 1: Register Merchant
-    merchant_id = test_merchant_registration()
+    merchant_id, test_email = test_merchant_registration()
     results.append(("Merchant Registration", merchant_id is not None))
     
-    if not merchant_id:
-        print_error("Cannot continue without merchant ID")
+    if not merchant_id or not test_email:
+        print_error("Cannot continue without merchant ID and email")
         return False
     
     # Step 2: Admin Login
