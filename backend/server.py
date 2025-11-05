@@ -781,6 +781,46 @@ async def update_merchant_deal(
         raise HTTPException(status_code=500, detail="Failed to update deal")
 
 
+@api_router.delete("/merchant/deals/{deal_id}")
+async def delete_merchant_deal(
+    deal_id: str,
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Delete a deal and all associated files"""
+    try:
+        merchant_id = merchant_data['merchant_id']
+        
+        # Verify deal belongs to merchant
+        existing_deal = await db.merchants.find_one({"id": deal_id, "merchantAccountId": merchant_id})
+        if not existing_deal:
+            raise HTTPException(status_code=404, detail="Deal not found or unauthorized")
+        
+        # Delete all associated images
+        if existing_deal.get('imageUrl'):
+            delete_upload_file(existing_deal['imageUrl'])
+        
+        for img_path in existing_deal.get('additionalImages', []):
+            delete_upload_file(img_path)
+        
+        # Delete upload records from database
+        await db.uploads.delete_many({"dealId": deal_id})
+        
+        # Delete deal
+        result = await db.merchants.delete_one({"id": deal_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Deal not found")
+        
+        return {
+            "message": "Deal deleted successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting deal: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete deal")
+
+
 # ========== FILE UPLOAD ENDPOINTS ==========
 
 @api_router.post("/merchant/upload")
