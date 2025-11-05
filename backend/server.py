@@ -591,7 +591,7 @@ async def create_merchant_deal(
         deal_id = str(uuid.uuid4())
         
         # Get merchant account to attach founder story to deals
-        merchant_account = await db.merchant_accounts.find_one({\"id\": merchant_id})
+        merchant_account = await db.merchant_accounts.find_one({"id": merchant_id})
         founder_story = merchant_account.get('founderStory', '') if merchant_account else ''
         
         # Save main image
