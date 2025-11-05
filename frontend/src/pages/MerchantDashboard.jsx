@@ -143,6 +143,24 @@ const MerchantDashboard = () => {
     }
   };
 
+  const handleDeleteDeal = async (dealId) => {
+    if (!window.confirm('Are you sure you want to delete this deal? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('merchant_token');
+      await axios.delete(`${API}/merchant/deals/${dealId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      toast({ title: 'Success!', description: 'Deal deleted successfully.' });
+      fetchDeals();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete deal.', variant: 'destructive' });
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('merchant_token');
     localStorage.removeItem('merchant_account');
