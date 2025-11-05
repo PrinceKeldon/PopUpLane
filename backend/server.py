@@ -627,8 +627,9 @@ async def create_merchant_deal(
                     )
                     await db.uploads.insert_one(upload.dict())
         
-        # Get merchant account for email
+        # Get merchant account for email and founder story
         account = await db.merchant_accounts.find_one({"id": merchant_id})
+        founder_story = account.get('founderStory', '') if account else ''
         
         # Create deal
         deal_data = {
@@ -643,8 +644,8 @@ async def create_merchant_deal(
             'additionalImages': additional_image_paths,
             'externalUrl': externalUrl,
             'email': account['email'],
-            'story': story,
-            'badges': assign_badges({'description': description, 'story': story, 'category': category})
+            'story': founder_story,
+            'badges': assign_badges({'description': description, 'story': founder_story, 'category': category})
         }
         
         deal = Merchant(**deal_data)
