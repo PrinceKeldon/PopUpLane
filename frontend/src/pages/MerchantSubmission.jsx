@@ -165,8 +165,7 @@ const MerchantSubmission = () => {
         description: '',
         discount: '',
         category: 'Home',
-        externalUrl: '',
-        story: ''
+        externalUrl: ''
       });
       setMainImage(null);
       setMainImagePreview(null);
