@@ -32,6 +32,18 @@ const MerchantDashboard = () => {
   const [additionalImagePreviews, setAdditionalImagePreviews] = useState([]);
   const [removeImageIndices, setRemoveImageIndices] = useState([]);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.relative')) {
+        setShowDealSelector(false);
+        setShowDeleteSelector(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('merchant_token');
     const accountData = localStorage.getItem('merchant_account');
