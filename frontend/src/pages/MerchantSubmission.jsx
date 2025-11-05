@@ -27,8 +27,7 @@ const MerchantSubmission = () => {
     description: '',
     discount: '',
     category: 'Home',
-    externalUrl: '',
-    story: ''
+    externalUrl: ''
   });
 
   const categories = ['Home', 'Style', 'Tech', 'Beauty', 'Food', 'Accessories', 'Health'];
