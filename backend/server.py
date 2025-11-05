@@ -1080,7 +1080,7 @@ async def update_merchant_account_status(
     status_update: MerchantAccountStatusUpdate,
     authorized: bool = Depends(verify_admin_token)
 ):
-    """Approve/reject merchant account (admin only)"""
+    """Approve/reject/suspend merchant account (admin only)"""
     try:
         update_data = {
             "accountStatus": status_update.status,
@@ -1107,6 +1107,43 @@ async def update_merchant_account_status(
     except Exception as e:
         logging.error(f"Error updating merchant account status: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update status")
+
+
+@api_router.delete("/admin/merchant-accounts/{account_id}")
+async def delete_merchant_account(
+    account_id: str,
+    authorized: bool = Depends(verify_admin_token)
+):
+    """Delete merchant account and all associated deals (admin only)"""
+    try:
+        # Get all deals for this merchant
+        deals = await db.merchants.find({"merchantAccountId": account_id}).to_list(1000)
+        
+        # Delete all images for each deal
+        for deal in deals:
+            if deal.get('imageUrl'):
+                delete_upload_file(deal['imageUrl'])
+            for img_path in deal.get('additionalImages', []):
+                delete_upload_file(img_path)
+        
+        # Delete all deals
+        await db.merchants.delete_many({"merchantAccountId": account_id})
+        
+        # Delete all upload records
+        await db.uploads.delete_many({"merchantAccountId": account_id})
+        
+        # Delete merchant account
+        result = await db.merchant_accounts.delete_one({"id": account_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Merchant account not found")
+        
+        return {"message": "Merchant account and all associated data deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting merchant account: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete merchant account")
 
 
 @api_router.get("/admin/dashboard", response_model=DashboardStats)
