@@ -77,10 +77,12 @@ def test_merchant_registration():
     """Test Step 1: Register a New Merchant Account"""
     print_header("STEP 1: MERCHANT REGISTRATION")
     
+    # Use timestamp to make email unique
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     merchant_data = {
         "businessName": "Test Store",
         "contactName": "John Doe", 
-        "email": "testmerchant@example.com",
+        "email": f"testmerchant_{timestamp}@example.com",
         "password": "Test1234",
         "phone": "+1234567890",
         "website": "https://teststore.com",
