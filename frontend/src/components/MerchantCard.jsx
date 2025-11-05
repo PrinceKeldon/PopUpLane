@@ -75,11 +75,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
     <>
     <Card 
       className="merchant-card overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer" 
-      style={{ 
-        background: 'linear-gradient(135deg, #8B1538 0%, #A91D3A 50%, #C73659 100%)',
-        border: '1px solid rgba(139, 21, 56, 0.3)',
-        boxShadow: '0 4px 6px rgba(139, 21, 56, 0.2)'
-      }}
+      style={{ backgroundColor: '#FAFAFA', border: '1px solid #e5e5e5' }}
       onClick={() => setShowDetailsDialog(true)}
     >
       {/* Main Image with Navigation */}
