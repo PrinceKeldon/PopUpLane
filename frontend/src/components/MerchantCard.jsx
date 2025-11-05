@@ -185,15 +185,15 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
       {/* Content */}
       <div className="p-6 pt-4">
         <div className="mb-3">
-          <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#FFF5F7' }}>
+          <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
             {merchant.brandName}
           </h3>
-          <p className="text-sm" style={{ color: '#FFE4EC' }}>
+          <p className="text-sm" style={{ color: '#666' }}>
             {merchant.tagline}
           </p>
         </div>
 
-        <p className="text-sm mb-4 line-clamp-2" style={{ color: '#FFF0F3' }}>
+        <p className="text-sm mb-4 line-clamp-2" style={{ color: '#444' }}>
           {merchant.description}
         </p>
 
@@ -204,12 +204,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
               key={index} 
               variant="secondary"
               className="text-xs"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-                color: '#FFF', 
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backdropFilter: 'blur(10px)'
-              }}
+              style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)', color: '#3A7BD5', border: '1px solid rgba(58, 123, 213, 0.2)' }}
             >
               {badge}
             </Badge>
@@ -221,7 +216,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
           <Button 
             onClick={(e) => { e.stopPropagation(); onVisit(merchant); }}
             className="flex-1 transition-all duration-300"
-            style={{ backgroundColor: '#FFD700', color: '#8B1538', fontWeight: 'bold' }}
+            style={{ backgroundColor: '#22c55e', color: '#FAFAFA', fontWeight: '600' }}
           >
             Visit Store
             <ExternalLink className="ml-2 h-4 w-4" />
@@ -231,24 +226,16 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
             variant="outline"
             size="icon"
             className="transition-all duration-300"
-            style={{ 
-              borderColor: isSaved ? '#FFD700' : 'rgba(255, 255, 255, 0.3)', 
-              color: isSaved ? '#FFD700' : '#FFF', 
-              backgroundColor: isSaved ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)' 
-            }}
+            style={{ borderColor: isSaved ? '#FF4F81' : '#e5e5e5', color: isSaved ? '#FF4F81' : '#666', backgroundColor: isSaved ? 'rgba(255, 79, 129, 0.1)' : 'transparent' }}
           >
-            <Bookmark className="h-4 w-4" fill={isSaved ? '#FFD700' : 'none'} />
+            <Bookmark className="h-4 w-4" fill={isSaved ? '#FF4F81' : 'none'} />
           </Button>
           <Button 
             onClick={(e) => { e.stopPropagation(); setShowShareDialog(true); }}
             variant="outline"
             size="icon"
             className="transition-all duration-300"
-            style={{ 
-              borderColor: 'rgba(255, 255, 255, 0.3)', 
-              color: '#FFF',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)'
-            }}
+            style={{ borderColor: '#e5e5e5', color: '#666' }}
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -260,7 +247,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
             <button
               onClick={(e) => { e.stopPropagation(); setShowStoryDialog(true); }}
               className="text-sm underline transition-colors duration-300"
-              style={{ color: '#FFD700' }}
+              style={{ color: '#3A7BD5' }}
             >
               Read the brand story
             </button>
