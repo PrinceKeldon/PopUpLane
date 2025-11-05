@@ -41,6 +41,7 @@ class MerchantAccount(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    founderStory: Optional[str] = Field(None, max_length=2000)
     accountStatus: MerchantAccountStatus = Field(default=MerchantAccountStatus.PENDING_APPROVAL)
     rejectionReason: Optional[str] = None
     createdAt: datetime = Field(default_factory=datetime.utcnow)
