@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
 import { toast } from '../hooks/use-toast';
-import { LogOut, Plus, TrendingUp, Eye, ShoppingBag } from 'lucide-react';
+import { LogOut, Plus, TrendingUp, Eye, ShoppingBag, Edit2, Trash2, User, BookOpen, Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -15,9 +19,18 @@ const MerchantDashboard = () => {
   const [merchantAccount, setMerchantAccount] = useState(null);
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showEditDealDialog, setShowEditDealDialog] = useState(false);
+  const [editingDeal, setEditingDeal] = useState(null);
+  const [profileData, setProfileData] = useState({});
+  const [dealFormData, setDealFormData] = useState({});
+  const [mainImage, setMainImage] = useState(null);
+  const [mainImagePreview, setMainImagePreview] = useState(null);
+  const [additionalImages, setAdditionalImages] = useState([]);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState([]);
+  const [removeImageIndices, setRemoveImageIndices] = useState([]);
 
   useEffect(() => {
-    // Check if merchant is logged in
     const token = localStorage.getItem('merchant_token');
     const accountData = localStorage.getItem('merchant_account');
     
@@ -26,7 +39,14 @@ const MerchantDashboard = () => {
       return;
     }
 
-    setMerchantAccount(JSON.parse(accountData));
+    const account = JSON.parse(accountData);
+    setMerchantAccount(account);
+    setProfileData({
+      phone: account.phone || '',
+      website: account.website || '',
+      description: account.description || '',
+      founderStory: account.founderStory || ''
+    });
     fetchDeals();
   }, [navigate]);
 
@@ -36,9 +56,7 @@ const MerchantDashboard = () => {
       const token = localStorage.getItem('merchant_token');
       
       const response = await axios.get(`${API}/merchant/deals`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       setDeals(response.data);
@@ -49,14 +67,79 @@ const MerchantDashboard = () => {
         localStorage.removeItem('merchant_account');
         navigate('/merchant/signin');
       } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to load your deals.',
-          variant: 'destructive'
-        });
+        toast({ title: 'Error', description: 'Failed to load your deals.', variant: 'destructive' });
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    try {
+      const token = localStorage.getItem('merchant_token');
+      await axios.patch(`${API}/merchant/profile`, profileData, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // Update localStorage
+      const updatedAccount = { ...merchantAccount, ...profileData };
+      localStorage.setItem('merchant_account', JSON.stringify(updatedAccount));
+      setMerchantAccount(updatedAccount);
+
+      toast({ title: 'Success!', description: 'Profile updated successfully.' });
+      setShowProfileDialog(false);
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update profile.', variant: 'destructive' });
+    }
+  };
+
+  const openEditDeal = (deal) => {
+    setEditingDeal(deal);
+    setDealFormData({
+      brandName: deal.brandName,
+      tagline: deal.tagline,
+      description: deal.description,
+      discount: deal.discount,
+      category: deal.category,
+      externalUrl: deal.externalUrl
+    });
+    setMainImage(null);
+    setMainImagePreview(deal.imageUrl);
+    setAdditionalImages([]);
+    setAdditionalImagePreviews(deal.additionalImages || []);
+    setRemoveImageIndices([]);
+    setShowEditDealDialog(true);
+  };
+
+  const handleEditDeal = async () => {
+    try {
+      const token = localStorage.getItem('merchant_token');
+      const formData = new FormData();
+      
+      Object.keys(dealFormData).forEach(key => {
+        formData.append(key, dealFormData[key]);
+      });
+      
+      if (mainImage) formData.append('mainImage', mainImage);
+      if (removeImageIndices.length > 0) {
+        formData.append('removeImageIndices', removeImageIndices.join(','));
+      }
+      additionalImages.forEach(img => {
+        if (img) formData.append('additionalImages', img);
+      });
+
+      await axios.put(`${API}/merchant/deals/${editingDeal.id}`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      toast({ title: 'Success!', description: 'Deal updated successfully.' });
+      setShowEditDealDialog(false);
+      fetchDeals();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update deal.', variant: 'destructive' });
     }
   };
 
@@ -66,7 +149,6 @@ const MerchantDashboard = () => {
     navigate('/merchant/signin');
   };
 
-  // Calculate stats
   const stats = {
     total: deals.length,
     approved: deals.filter(d => d.status === 'approved').length,
@@ -86,7 +168,6 @@ const MerchantDashboard = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FAFAFA' }}>
-      {/* Header */}
       <header className="py-6 px-6 border-b" style={{ backgroundColor: '#111', borderColor: 'rgba(250, 250, 250, 0.1)' }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
@@ -96,40 +177,24 @@ const MerchantDashboard = () => {
             <p className="text-sm" style={{ color: '#FAFAFA', opacity: 0.7 }}>{merchantAccount?.email}</p>
           </div>
           <div className="flex gap-3">
-            <Button 
-              onClick={() => navigate('/merchant/submit')}
-              style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Submit New Deal
+            <Button onClick={() => setShowProfileDialog(true)} variant="outline" style={{ borderColor: '#FAFAFA', color: '#FAFAFA' }}>
+              <User className="mr-2 h-4 w-4" />
+              Profile & Story
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={handleLogout}
-              style={{ color: '#FAFAFA' }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
+            <Button onClick={() => navigate('/merchant/submit')} style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Deal
+            </Button>
+            <Button onClick={handleLogout} variant="ghost" style={{ color: '#FAFAFA' }}>
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Welcome Message */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
-            Welcome back!
-          </h2>
-          <p className="text-lg" style={{ color: '#666' }}>
-            Manage your deals and track performance
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <Card className="p-6" style={{ backgroundColor: '#FFF', border: '2px solid #e5e5e5' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm mb-1" style={{ color: '#666' }}>Total Deals</p>
@@ -137,62 +202,55 @@ const MerchantDashboard = () => {
                   {stats.total}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)' }}>
-                <ShoppingBag className="h-6 w-6" style={{ color: '#3A7BD5' }} />
-              </div>
-            </div>
-            <div className="mt-4 flex gap-4 text-xs">
-              <span style={{ color: '#22c55e' }}>Approved: {stats.approved}</span>
-              <span style={{ color: '#eab308' }}>Pending: {stats.pending}</span>
-              <span style={{ color: '#ef4444' }}>Rejected: {stats.rejected}</span>
+              <ShoppingBag className="h-8 w-8" style={{ color: '#3A7BD5' }} />
             </div>
           </Card>
-
-          <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+          <Card className="p-6" style={{ backgroundColor: '#FFF', border: '2px solid #e5e5e5' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm mb-1" style={{ color: '#666' }}>Approved</p>
+                <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#22c55e' }}>
+                  {stats.approved}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
+                <TrendingUp className="h-6 w-6" style={{ color: '#22c55e' }} />
+              </div>
+            </div>
+          </Card>
+          <Card className="p-6" style={{ backgroundColor: '#FFF', border: '2px solid #e5e5e5' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm mb-1" style={{ color: '#666' }}>Total Clicks</p>
-                <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#3A7BD5' }}>
                   {stats.totalClicks}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)' }}>
-                <Eye className="h-6 w-6" style={{ color: '#3A7BD5' }} />
-              </div>
+              <Eye className="h-8 w-8" style={{ color: '#3A7BD5' }} />
             </div>
           </Card>
-
-          <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
+          <Card className="p-6" style={{ backgroundColor: '#FFF', border: '2px solid #e5e5e5' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm mb-1" style={{ color: '#666' }}>Total Saves</p>
-                <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                <p className="text-3xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#FF4F81' }}>
                   {stats.totalSaves}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255, 79, 129, 0.1)' }}>
-                <TrendingUp className="h-6 w-6" style={{ color: '#FF4F81' }} />
-              </div>
+              <BookOpen className="h-8 w-8" style={{ color: '#FF4F81' }} />
             </div>
           </Card>
         </div>
 
-        {/* Deals List */}
-        <Card className="p-6" style={{ backgroundColor: '#FAFAFA', border: '2px solid #e5e5e5' }}>
-          <h3 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+        <Card className="p-6" style={{ backgroundColor: '#FFF', border: '2px solid #e5e5e5' }}>
+          <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
             Your Deals
-          </h3>
-
+          </h2>
           {deals.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag className="h-16 w-16 mx-auto mb-4" style={{ color: '#e5e5e5' }} />
-              <p className="text-lg mb-4" style={{ color: '#666' }}>
-                You haven't submitted any deals yet
-              </p>
-              <Button 
-                onClick={() => navigate('/merchant/submit')}
-                style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}
-              >
+              <p className="text-lg mb-4" style={{ color: '#666' }}>No deals yet</p>
+              <Button onClick={() => navigate('/merchant/submit')} style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Submit Your First Deal
               </Button>
@@ -200,78 +258,36 @@ const MerchantDashboard = () => {
           ) : (
             <div className="space-y-4">
               {deals.map(deal => (
-                <div
-                  key={deal.id}
-                  className="p-4 rounded-lg border"
-                  style={{ borderColor: '#e5e5e5', backgroundColor: '#FFF' }}
-                >
-                  <div className="flex gap-4">
-                    <img
-                      src={`${BACKEND_URL}${deal.imageUrl}`}
-                      alt={deal.brandName}
-                      className="w-32 h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.src = deal.imageUrl;
-                      }}
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="text-xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
-                            {deal.brandName}
-                          </h4>
-                          <p className="text-sm" style={{ color: '#666' }}>{deal.tagline}</p>
-                        </div>
-                        <Badge
-                          style={{
-                            backgroundColor: 
-                              deal.status === 'approved' ? 'rgba(34, 197, 94, 0.1)' :
-                              deal.status === 'pending' ? 'rgba(234, 179, 8, 0.1)' :
-                              'rgba(239, 68, 68, 0.1)',
-                            color:
-                              deal.status === 'approved' ? '#22c55e' :
-                              deal.status === 'pending' ? '#eab308' :
-                              '#ef4444'
-                          }}
-                        >
+                <div key={deal.id} className="p-4 rounded-lg border flex items-start gap-4" style={{ borderColor: '#e5e5e5', backgroundColor: '#FAFAFA' }}>
+                  <img src={`${BACKEND_URL}${deal.imageUrl}`} alt={deal.brandName} className="w-24 h-24 object-cover rounded-lg" onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'} />
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                          {deal.brandName}
+                        </h3>
+                        <p className="text-sm mb-2" style={{ color: '#666' }}>{deal.tagline}</p>
+                        <Badge style={{
+                          backgroundColor: deal.status === 'approved' ? 'rgba(34, 197, 94, 0.1)' :
+                                         deal.status === 'pending' ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          color: deal.status === 'approved' ? '#22c55e' :
+                                deal.status === 'pending' ? '#eab308' : '#ef4444'
+                        }}>
                           {deal.status}
                         </Badge>
                       </div>
-                      
-                      <p className="text-sm mb-3" style={{ color: '#444' }}>{deal.description}</p>
-                      
-                      <div className="flex items-center gap-6 text-sm">
-                        <span style={{ color: '#666' }}>
-                          <strong style={{ color: '#FF4F81' }}>{deal.discount}</strong>
-                        </span>
-                        <span style={{ color: '#666' }}>Category: {deal.category}</span>
-                        <span style={{ color: '#666' }}>Clicks: {deal.clicks || 0}</span>
-                        <span style={{ color: '#666' }}>Saves: {deal.saves || 0}</span>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => openEditDeal(deal)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
                       </div>
-
-                      {deal.status === 'approved' && (
-                        <div className="mt-3">
-                          <Badge variant="secondary" style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)', color: '#3A7BD5' }}>
-                            Live on PopUp Lane
-                          </Badge>
-                        </div>
-                      )}
-
-                      {deal.status === 'pending' && (
-                        <div className="mt-3">
-                          <p className="text-sm" style={{ color: '#eab308' }}>
-                            ⏳ Awaiting admin approval
-                          </p>
-                        </div>
-                      )}
-
-                      {deal.status === 'rejected' && (
-                        <div className="mt-3">
-                          <p className="text-sm" style={{ color: '#ef4444' }}>
-                            ❌ This deal was not approved. Please contact support or submit a new deal.
-                          </p>
-                        </div>
-                      )}
+                    </div>
+                    <p className="text-sm mt-2 line-clamp-2" style={{ color: '#444' }}>{deal.description}</p>
+                    <div className="flex gap-4 mt-2 text-xs" style={{ color: '#666' }}>
+                      <span>Discount: {deal.discount}</span>
+                      <span>Category: {deal.category}</span>
+                      <span>{deal.clicks || 0} clicks</span>
+                      <span>{deal.saves || 0} saves</span>
                     </div>
                   </div>
                 </div>
@@ -280,6 +296,76 @@ const MerchantDashboard = () => {
           )}
         </Card>
       </div>
+
+      {/* Profile & Story Dialog */}
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FAFAFA' }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>Profile & Founder Story</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>Phone</Label>
+              <Input value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} placeholder="+1234567890" />
+            </div>
+            <div>
+              <Label>Website</Label>
+              <Input value={profileData.website} onChange={(e) => setProfileData({...profileData, website: e.target.value})} placeholder="https://yourwebsite.com" />
+            </div>
+            <div>
+              <Label>Business Description</Label>
+              <Textarea value={profileData.description} onChange={(e) => setProfileData({...profileData, description: e.target.value})} rows={3} placeholder="Brief description of your business" />
+            </div>
+            <div>
+              <Label className="flex items-center gap-2"><BookOpen className="h-4 w-4" /> Founder Story (Sticky)</Label>
+              <p className="text-xs mb-2" style={{ color: '#666' }}>This story will appear on all your deals. Share your journey, mission, or what makes your brand unique.</p>
+              <Textarea value={profileData.founderStory} onChange={(e) => setProfileData({...profileData, founderStory: e.target.value})} rows={6} placeholder="Tell shoppers your story..." />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleProfileUpdate} className="flex-1" style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}>Save Changes</Button>
+              <Button onClick={() => setShowProfileDialog(false)} variant="outline">Cancel</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Deal Dialog */}
+      <Dialog open={showEditDealDialog} onOpenChange={setShowEditDealDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#FAFAFA' }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>Edit Deal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div><Label>Brand Name</Label><Input value={dealFormData.brandName} onChange={(e) => setDealFormData({...dealFormData, brandName: e.target.value})} /></div>
+            <div><Label>Tagline</Label><Input value={dealFormData.tagline} onChange={(e) => setDealFormData({...dealFormData, tagline: e.target.value})} /></div>
+            <div><Label>Description</Label><Textarea value={dealFormData.description} onChange={(e) => setDealFormData({...dealFormData, description: e.target.value})} rows={4} /></div>
+            <div><Label>Discount</Label><Input value={dealFormData.discount} onChange={(e) => setDealFormData({...dealFormData, discount: e.target.value})} placeholder="e.g., 30% OFF" /></div>
+            <div><Label>Category</Label><select value={dealFormData.category} onChange={(e) => setDealFormData({...dealFormData, category: e.target.value})} className="w-full p-2 border rounded-lg">{ ['Home', 'Style', 'Tech', 'Beauty', 'Food', 'Accessories', 'Health'].map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+            <div><Label>Store URL</Label><Input value={dealFormData.externalUrl} onChange={(e) => setDealFormData({...dealFormData, externalUrl: e.target.value})} /></div>
+            <div>
+              <Label>Main Image</Label>
+              {mainImagePreview && <img src={`${BACKEND_URL}${mainImagePreview}`} alt="Main" className="w-full h-48 object-cover rounded-lg mb-2" onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'} />}
+              <Input type="file" accept="image/*" onChange={(e) => { setMainImage(e.target.files[0]); setMainImagePreview(URL.createObjectURL(e.target.files[0])); }} />
+            </div>
+            <div>
+              <Label>Additional Images (max 4)</Label>
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {additionalImagePreviews.map((img, i) => (
+                  <div key={i} className="relative">
+                    <img src={`${BACKEND_URL}${img}`} alt={`Additional ${i}`} className="w-full h-24 object-cover rounded-lg" onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'} />
+                    <button onClick={() => { setRemoveImageIndices([...removeImageIndices, i]); setAdditionalImagePreviews(additionalImagePreviews.filter((_, idx) => idx !== i)); }} className="absolute top-1 right-1 p-1 rounded-full" style={{ backgroundColor: 'rgba(239, 68, 68, 0.9)' }}><X className="h-3 w-3" style={{ color: '#FFF' }} /></button>
+                  </div>
+                ))}
+              </div>
+              <Input type="file" accept="image/*" multiple onChange={(e) => { const files = Array.from(e.target.files); setAdditionalImages([...additionalImages, ...files]); setAdditionalImagePreviews([...additionalImagePreviews, ...files.map(f => URL.createObjectURL(f))]); }} />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleEditDeal} className="flex-1" style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}>Save Changes</Button>
+              <Button onClick={() => setShowEditDealDialog(false)} variant="outline">Cancel</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
