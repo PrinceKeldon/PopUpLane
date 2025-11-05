@@ -142,7 +142,7 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         <div className="px-4 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
             <button
-              onClick={() => setCurrentImageIndex(0)}
+              onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(0); }}
               className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-300"
               style={{
                 border: currentImageIndex === 0 ? '2px solid #3A7BD5' : '2px solid transparent',
@@ -150,15 +150,18 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
               }}
             >
               <img 
-                src={merchant.imageUrl}
+                src={getImageUrl(merchant.imageUrl)}
                 alt={`${merchant.brandName} main`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+                }}
               />
             </button>
             {merchant.additionalImages.map((img, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentImageIndex(index + 1)}
+                onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(index + 1); }}
                 className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-300 hover:opacity-100"
                 style={{
                   border: currentImageIndex === index + 1 ? '2px solid #3A7BD5' : '2px solid transparent',
@@ -166,9 +169,12 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
                 }}
               >
                 <img 
-                  src={img}
+                  src={getImageUrl(img)}
                   alt={`${merchant.brandName} ${index + 2}`}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+                  }}
                 />
               </button>
             ))}
