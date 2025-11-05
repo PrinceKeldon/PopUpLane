@@ -67,6 +67,7 @@ class MerchantAccountUpdate(BaseModel):
     phone: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
+    founderStory: Optional[str] = Field(None, max_length=2000)
 
 
 class FileUpload(BaseModel):
