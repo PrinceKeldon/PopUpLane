@@ -199,6 +199,99 @@ const MerchantDashboard = () => {
               <User className="mr-2 h-4 w-4" />
               Profile & Story
             </Button>
+            
+            {/* Edit Deal Dropdown */}
+            {deals.length > 0 && (
+              <div className="relative">
+                <Button 
+                  onClick={() => setShowDealSelector(!showDealSelector)} 
+                  variant="outline" 
+                  style={{ borderColor: '#FAFAFA', color: '#FAFAFA' }}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit Deal
+                </Button>
+                {showDealSelector && (
+                  <div className="absolute top-full mt-2 right-0 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                    <div className="p-2">
+                      <p className="text-xs font-semibold px-2 py-1 text-gray-500">Select a deal to edit:</p>
+                      {deals.map(deal => (
+                        <button
+                          key={deal.id}
+                          onClick={() => {
+                            openEditDeal(deal);
+                            setShowDealSelector(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center gap-3"
+                        >
+                          <img 
+                            src={`${BACKEND_URL}${deal.imageUrl}`} 
+                            alt={deal.brandName}
+                            className="w-10 h-10 object-cover rounded"
+                            onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{deal.brandName}</p>
+                            <p className="text-xs text-gray-500 truncate">{deal.discount}</p>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            deal.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            deal.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {deal.status}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Delete Deal Dropdown */}
+            {deals.length > 0 && (
+              <div className="relative">
+                <Button 
+                  onClick={() => setShowDeleteSelector(!showDeleteSelector)} 
+                  variant="outline" 
+                  style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Deal
+                </Button>
+                {showDeleteSelector && (
+                  <div className="absolute top-full mt-2 right-0 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                    <div className="p-2">
+                      <p className="text-xs font-semibold px-2 py-1 text-gray-500">Select a deal to delete:</p>
+                      {deals.map(deal => (
+                        <button
+                          key={deal.id}
+                          onClick={() => {
+                            handleDeleteDeal(deal.id);
+                            setShowDeleteSelector(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-red-50 rounded flex items-center gap-3"
+                        >
+                          <img 
+                            src={`${BACKEND_URL}${deal.imageUrl}`} 
+                            alt={deal.brandName}
+                            className="w-10 h-10 object-cover rounded"
+                            onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{deal.brandName}</p>
+                            <p className="text-xs text-gray-500 truncate">{deal.discount}</p>
+                          </div>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             <Button onClick={() => navigate('/merchant/submit')} style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}>
               <Plus className="mr-2 h-4 w-4" />
               New Deal
