@@ -235,16 +235,24 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
             variant="outline"
             size="icon"
             className="transition-all duration-300"
-            style={{ borderColor: isSaved ? '#FF4F81' : '#e5e5e5', color: isSaved ? '#FF4F81' : '#666', backgroundColor: isSaved ? 'rgba(255, 79, 129, 0.1)' : 'transparent' }}
+            style={{ 
+              borderColor: isSaved ? '#FFD700' : 'rgba(255, 255, 255, 0.3)', 
+              color: isSaved ? '#FFD700' : '#FFF', 
+              backgroundColor: isSaved ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)' 
+            }}
           >
-            <Bookmark className="h-4 w-4" fill={isSaved ? '#FF4F81' : 'none'} />
+            <Bookmark className="h-4 w-4" fill={isSaved ? '#FFD700' : 'none'} />
           </Button>
           <Button 
-            onClick={() => setShowShareDialog(true)}
+            onClick={(e) => { e.stopPropagation(); setShowShareDialog(true); }}
             variant="outline"
             size="icon"
             className="transition-all duration-300"
-            style={{ borderColor: '#e5e5e5', color: '#666' }}
+            style={{ 
+              borderColor: 'rgba(255, 255, 255, 0.3)', 
+              color: '#FFF',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }}
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -254,9 +262,9 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         {merchant.story && (
           <div className="mt-3">
             <button
-              onClick={() => setShowStoryDialog(true)}
+              onClick={(e) => { e.stopPropagation(); setShowStoryDialog(true); }}
               className="text-sm underline transition-colors duration-300"
-              style={{ color: '#3A7BD5' }}
+              style={{ color: '#FFD700' }}
             >
               Read the brand story
             </button>
