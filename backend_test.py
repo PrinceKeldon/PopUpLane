@@ -263,9 +263,11 @@ def test_get_active_merchant_accounts(admin_token):
         print_success(f"Retrieved {len(response)} active merchant accounts")
         
         # Check if our test merchant is in the active list
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        test_email = f"testmerchant_{timestamp}@example.com"
         test_merchant_found = False
         for account in response:
-            if account.get('email') == 'testmerchant@example.com':
+            if account.get('email') == test_email:
                 test_merchant_found = True
                 print_success("Test merchant found in active accounts list!")
                 print_info(f"Business Name: {account.get('businessName')}")
