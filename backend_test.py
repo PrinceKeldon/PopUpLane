@@ -320,11 +320,11 @@ def main():
     results.append(("Approve Merchant", approval_success))
     
     # Step 6: Merchant Login After Approval
-    login_success = test_merchant_login_after_approval()
+    login_success = test_merchant_login_after_approval(test_email)
     results.append(("Merchant Login After Approval", login_success))
     
     # Step 7: Get Active Merchant Accounts
-    active_accounts_success = test_get_active_merchant_accounts(admin_token)
+    active_accounts_success = test_get_active_merchant_accounts(admin_token, test_email)
     results.append(("Get Active Merchant Accounts", active_accounts_success))
     
     # Print Summary
