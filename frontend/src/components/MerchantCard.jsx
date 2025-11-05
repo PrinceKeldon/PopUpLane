@@ -311,6 +311,171 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         </Dialog>
       )}
 
+      {/* Details Dialog - Full merchant info */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent 
+          className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" 
+          style={{ backgroundColor: '#FAFAFA' }}
+        >
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111', fontSize: '24px' }}>
+              {merchant.brandName}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto flex-1 pr-4 -mr-4" style={{ scrollbarWidth: 'thin' }}>
+            {/* Image Gallery */}
+            <div className="relative h-96 mb-6 rounded-lg overflow-hidden">
+              <img 
+                src={allImages[currentImageIndex]} 
+                alt={`${merchant.brandName} - Image ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+                }}
+              />
+              
+              {/* Discount Badge */}
+              <div className="absolute top-4 right-4 px-6 py-3 rounded-full font-bold text-lg" style={{ backgroundColor: '#FF4F81', color: '#FAFAFA' }}>
+                {merchant.discount}
+              </div>
+
+              {/* Navigation */}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handlePrevImage(e); }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full"
+                    style={{ backgroundColor: 'rgba(17, 17, 17, 0.7)' }}
+                  >
+                    <ChevronLeft className="h-6 w-6" style={{ color: '#FAFAFA' }} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleNextImage(e); }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full"
+                    style={{ backgroundColor: 'rgba(17, 17, 17, 0.7)' }}
+                  >
+                    <ChevronRight className="h-6 w-6" style={{ color: '#FAFAFA' }} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Gallery */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                {allImages.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(index); }}
+                    className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden"
+                    style={{
+                      border: currentImageIndex === index ? '3px solid #3A7BD5' : '2px solid #e5e5e5',
+                      opacity: currentImageIndex === index ? 1 : 0.6
+                    }}
+                  >
+                    <img 
+                      src={img}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Tagline */}
+            <p className="text-lg mb-4" style={{ color: '#666', fontStyle: 'italic' }}>
+              {merchant.tagline}
+            </p>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {merchant.badges.map((badge, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary"
+                  style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)', color: '#3A7BD5', border: '1px solid rgba(58, 123, 213, 0.2)' }}
+                >
+                  {badge}
+                </Badge>
+              ))}
+            </div>
+
+            {/* Description */}
+            <div className="mb-6">
+              <h3 className="text-lg font-bold mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                About This Deal
+              </h3>
+              <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#444' }}>
+                {merchant.description}
+              </p>
+            </div>
+
+            {/* Story */}
+            {merchant.story && (
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-2" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+                  Our Story
+                </h3>
+                <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#444' }}>
+                  {merchant.story}
+                </p>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="flex gap-6 mb-6 p-4 rounded-lg" style={{ backgroundColor: '#f5f5f5' }}>
+              <div>
+                <span className="text-sm" style={{ color: '#666' }}>Saves: </span>
+                <span className="font-bold" style={{ color: '#111' }}>{merchant.saves}</span>
+              </div>
+              <div>
+                <span className="text-sm" style={{ color: '#666' }}>Clicks: </span>
+                <span className="font-bold" style={{ color: '#111' }}>{merchant.clicks}</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 sticky bottom-0 bg-white/95 backdrop-blur-sm py-4 border-t" style={{ borderColor: '#e5e5e5' }}>
+              <Button 
+                onClick={(e) => { e.stopPropagation(); onVisit(merchant); setShowDetailsDialog(false); }}
+                className="flex-1"
+                size="lg"
+                style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}
+              >
+                Visit Store
+                <ExternalLink className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                onClick={(e) => { e.stopPropagation(); onSave(merchant); }}
+                variant="outline"
+                size="lg"
+                style={{ 
+                  borderColor: isSaved ? '#FF4F81' : '#e5e5e5', 
+                  color: isSaved ? '#FF4F81' : '#666', 
+                  backgroundColor: isSaved ? 'rgba(255, 79, 129, 0.1)' : 'transparent' 
+                }}
+              >
+                <Bookmark className="h-5 w-5 mr-2" fill={isSaved ? '#FF4F81' : 'none'} />
+                {isSaved ? 'Saved' : 'Save'}
+              </Button>
+              <Button 
+                onClick={(e) => { e.stopPropagation(); setShowShareDialog(true); }}
+                variant="outline"
+                size="lg"
+                style={{ borderColor: '#e5e5e5', color: '#666' }}
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <style jsx>{`
         @keyframes pulse {
           0%, 100% {
