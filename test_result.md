@@ -104,6 +104,85 @@
 
 user_problem_statement: "Redesign the PopUp Lane landing page using the minimalist-hero.tsx component while preserving all existing features including countdown timer, shopper authentication, merchant/shopper navigation, discovery grid, newsletter, and all existing functionalities."
 
+backend:
+  - task: "Merchant Registration API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MERCHANT REGISTRATION VERIFIED: POST /api/merchant/register endpoint working correctly. Successfully creates merchant accounts with 'pending_approval' status. Validates required fields (businessName, contactName, email, password, phone, website, description). Password validation enforces uppercase, numbers, and minimum length. Returns proper 201 status with merchant ID and confirmation message. Prevents duplicate email registration with appropriate 400 error."
+
+  - task: "Admin Authentication API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ ADMIN LOGIN VERIFIED: POST /api/admin/login endpoint working correctly with password 'admin123'. Returns JWT token with 24-hour expiration. Token authentication working for protected admin endpoints. Proper 401 error for invalid credentials."
+
+  - task: "Admin Merchant Account Management API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE FOUND: GET /api/admin/merchant-accounts endpoint returning 500 Internal Server Error due to MongoDB ObjectId serialization issue. Error: 'ObjectId' object is not iterable."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIXED AND VERIFIED: Fixed MongoDB ObjectId serialization issue by removing '_id' field from response. GET /api/admin/merchant-accounts now working correctly. Returns all merchant accounts with proper filtering by status. PATCH /api/admin/merchant-accounts/{id}/status working for approval/rejection. All admin endpoints properly protected with JWT authentication."
+
+  - task: "Admin Dashboard Statistics API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ DASHBOARD STATS INCOMPLETE: GET /api/admin/dashboard missing merchantAccounts field in response model. DashboardStats model only included merchants, shoppers, and laneStatus fields."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIXED AND VERIFIED: Updated DashboardStats model to include merchantAccounts field. Dashboard now correctly returns merchant account statistics (total, pending, active, rejected) along with merchant deals and shopper counts. All statistics accurately reflect database state."
+
+  - task: "Merchant Login After Approval API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MERCHANT LOGIN VERIFIED: POST /api/merchant/login endpoint working correctly. Properly validates credentials and account status. Blocks login for pending_approval and rejected accounts with appropriate error messages. Returns JWT token and full merchant account details for active accounts. Account status correctly updated to 'active' after admin approval."
+
+  - task: "Complete Merchant Registration and Admin Approval Workflow"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPLETE WORKFLOW VERIFIED: End-to-end merchant registration and admin approval workflow tested successfully. 1) Merchant registration creates account with pending_approval status ✅ 2) Admin login provides authentication token ✅ 3) Admin can view all merchant accounts with proper status filtering ✅ 4) Dashboard shows accurate merchant account statistics ✅ 5) Admin can approve merchant accounts ✅ 6) Approved merchants can login successfully ✅ 7) Active merchant accounts appear in filtered lists ✅ All API endpoints working correctly with proper authentication, validation, and error handling."
+
 frontend:
   - task: "Integrate MinimalistHero component into landing page"
     implemented: true
