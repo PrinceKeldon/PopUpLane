@@ -21,6 +21,8 @@ const MerchantDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showEditDealDialog, setShowEditDealDialog] = useState(false);
+  const [showDealSelector, setShowDealSelector] = useState(false);
+  const [showDeleteSelector, setShowDeleteSelector] = useState(false);
   const [editingDeal, setEditingDeal] = useState(null);
   const [profileData, setProfileData] = useState({});
   const [dealFormData, setDealFormData] = useState({});
