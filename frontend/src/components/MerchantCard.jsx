@@ -72,7 +72,12 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
   };
 
   return (
-    <Card className="merchant-card overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl" style={{ backgroundColor: '#FAFAFA', border: '1px solid #e5e5e5' }}>
+    <>
+    <Card 
+      className="merchant-card overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer" 
+      style={{ backgroundColor: '#FAFAFA', border: '1px solid #e5e5e5' }}
+      onClick={() => setShowDetailsDialog(true)}
+    >
       {/* Main Image with Navigation */}
       <div className="relative h-64 overflow-hidden group">
         <img 
@@ -80,6 +85,10 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
           alt={`${merchant.brandName} - Image ${currentImageIndex + 1}`}
           className="w-full h-full object-cover transition-transform duration-500"
           loading="lazy"
+          onError={(e) => {
+            console.error('Image failed to load:', allImages[currentImageIndex]);
+            e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80';
+          }}
         />
         
         {/* Discount Badge */}
