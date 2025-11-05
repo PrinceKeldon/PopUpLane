@@ -246,7 +246,7 @@ def test_merchant_login_after_approval(test_email):
         print_error("Merchant login failed after approval!")
         return False
 
-def test_get_active_merchant_accounts(admin_token):
+def test_get_active_merchant_accounts(admin_token, test_email):
     """Test Step 7: Get Active Merchant Accounts"""
     print_header("STEP 7: GET ACTIVE MERCHANT ACCOUNTS")
     
@@ -262,8 +262,6 @@ def test_get_active_merchant_accounts(admin_token):
         print_success(f"Retrieved {len(response)} active merchant accounts")
         
         # Check if our test merchant is in the active list
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        test_email = f"testmerchant_{timestamp}@example.com"
         test_merchant_found = False
         for account in response:
             if account.get('email') == test_email:
