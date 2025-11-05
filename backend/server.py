@@ -670,6 +670,113 @@ async def get_merchant_deals(merchant_data: dict = Depends(verify_merchant_token
         raise HTTPException(status_code=500, detail="Failed to fetch deals")
 
 
+@api_router.put("/merchant/deals/{deal_id}")
+async def update_merchant_deal(
+    deal_id: str,
+    brandName: str = Form(...),
+    tagline: str = Form(...),
+    description: str = Form(...),
+    discount: str = Form(...),
+    category: str = Form(...),
+    externalUrl: str = Form(...),
+    mainImage: UploadFile = File(None),
+    additionalImages: List[UploadFile] = File(None),
+    removeImageIndices: str = Form(""),  # Comma-separated indices of images to remove
+    merchant_data: dict = Depends(verify_merchant_token)
+):
+    """Update an existing deal"""
+    try:
+        merchant_id = merchant_data['merchant_id']
+        
+        # Verify deal belongs to merchant
+        existing_deal = await db.merchants.find_one({"id": deal_id, "merchantAccountId": merchant_id})
+        if not existing_deal:
+            raise HTTPException(status_code=404, detail="Deal not found or unauthorized")
+        
+        # Start with existing data
+        update_data = {
+            'brandName': brandName,
+            'tagline': tagline,
+            'description': description,
+            'discount': discount,
+            'category': category,
+            'externalUrl': externalUrl,
+            'updatedAt': datetime.utcnow()
+        }
+        
+        # Handle main image update
+        if mainImage and mainImage.filename:
+            # Delete old main image
+            if existing_deal.get('imageUrl'):
+                delete_upload_file(existing_deal['imageUrl'])
+            
+            # Save new main image
+            main_image_path, main_image_size = await save_upload_file(mainImage, merchant_id, deal_id)
+            update_data['imageUrl'] = main_image_path
+            
+            # Record upload
+            main_upload = FileUpload(
+                merchantAccountId=merchant_id,
+                dealId=deal_id,
+                filename=mainImage.filename,
+                storedPath=main_image_path,
+                fileSize=main_image_size,
+                mimeType=mainImage.content_type
+            )
+            await db.uploads.insert_one(main_upload.dict())
+        
+        # Handle additional images
+        additional_image_paths = list(existing_deal.get('additionalImages', []))
+        
+        # Remove images if specified
+        if removeImageIndices:
+            indices_to_remove = [int(i) for i in removeImageIndices.split(',') if i.strip()]
+            for index in sorted(indices_to_remove, reverse=True):
+                if 0 <= index < len(additional_image_paths):
+                    delete_upload_file(additional_image_paths[index])
+                    additional_image_paths.pop(index)
+        
+        # Add new additional images
+        if additionalImages:
+            for img in additionalImages:
+                if img.filename and len(additional_image_paths) < 4:
+                    img_path, img_size = await save_upload_file(img, merchant_id, deal_id)
+                    additional_image_paths.append(img_path)
+                    
+                    # Record upload
+                    upload = FileUpload(
+                        merchantAccountId=merchant_id,
+                        dealId=deal_id,
+                        filename=img.filename,
+                        storedPath=img_path,
+                        fileSize=img_size,
+                        mimeType=img.content_type
+                    )
+                    await db.uploads.insert_one(upload.dict())
+        
+        update_data['additionalImages'] = additional_image_paths
+        update_data['badges'] = assign_badges({'description': description, 'category': category})
+        
+        # Update deal
+        result = await db.merchants.update_one(
+            {"id": deal_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Deal not found")
+        
+        return {
+            "id": deal_id,
+            "message": "Deal updated successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating deal: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update deal")
+
+
 # ========== FILE UPLOAD ENDPOINTS ==========
 
 @api_router.post("/merchant/upload")
