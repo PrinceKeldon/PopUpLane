@@ -129,6 +129,69 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSuspendMerchant = async (accountId) => {
+    if (!window.confirm('Are you sure you want to suspend this merchant? They will not be able to login or submit new deals.')) {
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `${BACKEND_URL}/api/admin/merchant-accounts/${accountId}/status`,
+        { status: 'suspended' },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          }
+        }
+      );
+      
+      toast({
+        title: 'Success!',
+        description: 'Merchant account suspended successfully.',
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error suspending merchant:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to suspend merchant account.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDeleteMerchant = async (accountId) => {
+    if (!window.confirm('Are you sure you want to DELETE this merchant? This will permanently remove their account and ALL their deals. This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `${BACKEND_URL}/api/admin/merchant-accounts/${accountId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          }
+        }
+      );
+      
+      toast({
+        title: 'Success!',
+        description: 'Merchant account and all deals deleted successfully.',
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting merchant:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete merchant account.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     navigate('/admin/login');
