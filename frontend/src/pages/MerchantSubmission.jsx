@@ -420,22 +420,6 @@ const MerchantSubmission = () => {
               <p className="text-xs mt-1" style={{ color: '#666' }}>Where should shoppers go to purchase?</p>
             </div>
 
-            {/* Brand Story */}
-            <div>
-              <Label htmlFor="story" className="text-base font-semibold mb-2" style={{ color: '#111' }}>
-                Your Brand Story (Optional)
-              </Label>
-              <Textarea
-                id="story"
-                name="story"
-                value={formData.story}
-                onChange={handleChange}
-                placeholder="Share your journey, mission, or what makes your brand unique..."
-                className="mt-2"
-                rows={4}
-              />
-            </div>
-
             {/* Submit Button */}
             <div className="pt-4">
               <Button
