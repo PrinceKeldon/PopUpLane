@@ -295,8 +295,17 @@ const MerchantDashboard = () => {
                         </Badge>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => openEditDeal(deal)}>
+                        <Button size="sm" variant="outline" onClick={() => openEditDeal(deal)} title="Edit deal">
                           <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleDeleteDeal(deal.id)}
+                          title="Delete deal"
+                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
