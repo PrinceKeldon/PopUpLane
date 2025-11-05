@@ -100,5 +100,6 @@ class AdminToken(BaseModel):
 
 class DashboardStats(BaseModel):
     merchants: dict
+    merchantAccounts: dict
     shoppers: dict
     laneStatus: str
