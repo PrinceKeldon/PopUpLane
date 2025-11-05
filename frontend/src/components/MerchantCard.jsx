@@ -189,15 +189,15 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
       {/* Content */}
       <div className="p-6 pt-4">
         <div className="mb-3">
-          <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#111' }}>
+          <h3 className="text-xl font-bold mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#FFF5F7' }}>
             {merchant.brandName}
           </h3>
-          <p className="text-sm" style={{ color: '#666' }}>
+          <p className="text-sm" style={{ color: '#FFE4EC' }}>
             {merchant.tagline}
           </p>
         </div>
 
-        <p className="text-sm mb-4 line-clamp-2" style={{ color: '#444' }}>
+        <p className="text-sm mb-4 line-clamp-2" style={{ color: '#FFF0F3' }}>
           {merchant.description}
         </p>
 
@@ -208,7 +208,12 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
               key={index} 
               variant="secondary"
               className="text-xs"
-              style={{ backgroundColor: 'rgba(58, 123, 213, 0.1)', color: '#3A7BD5', border: '1px solid rgba(58, 123, 213, 0.2)' }}
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+                color: '#FFF', 
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(10px)'
+              }}
             >
               {badge}
             </Badge>
@@ -218,15 +223,15 @@ const MerchantCard = ({ merchant, onVisit, onSave, isSaved }) => {
         {/* Actions */}
         <div className="flex gap-2">
           <Button 
-            onClick={() => onVisit(merchant)}
+            onClick={(e) => { e.stopPropagation(); onVisit(merchant); }}
             className="flex-1 transition-all duration-300"
-            style={{ backgroundColor: '#3A7BD5', color: '#FAFAFA' }}
+            style={{ backgroundColor: '#FFD700', color: '#8B1538', fontWeight: 'bold' }}
           >
             Visit Store
             <ExternalLink className="ml-2 h-4 w-4" />
           </Button>
           <Button 
-            onClick={() => onSave(merchant)}
+            onClick={(e) => { e.stopPropagation(); onSave(merchant); }}
             variant="outline"
             size="icon"
             className="transition-all duration-300"
