@@ -383,7 +383,13 @@ const MerchantDashboard = () => {
           ) : (
             <div className="space-y-4">
               {deals.map(deal => (
-                <div key={deal.id} className="p-4 rounded-lg border flex items-start gap-4" style={{ borderColor: '#e5e5e5', backgroundColor: '#FAFAFA' }}>
+                <div 
+                  key={deal.id} 
+                  onClick={() => openEditDeal(deal)}
+                  className="p-4 rounded-lg border flex items-start gap-4 cursor-pointer transition-all hover:shadow-md hover:border-blue-300" 
+                  style={{ borderColor: '#e5e5e5', backgroundColor: '#FAFAFA' }}
+                  title="Click to view/edit deal"
+                >
                   <img src={`${BACKEND_URL}${deal.imageUrl}`} alt={deal.brandName} className="w-24 h-24 object-cover rounded-lg" onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80'} />
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
@@ -401,19 +407,8 @@ const MerchantDashboard = () => {
                           {deal.status}
                         </Badge>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => openEditDeal(deal)} title="Edit deal">
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleDeleteDeal(deal.id)}
-                          title="Delete deal"
-                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                        Click to edit
                       </div>
                     </div>
                     <p className="text-sm mt-2 line-clamp-2" style={{ color: '#444' }}>{deal.description}</p>
