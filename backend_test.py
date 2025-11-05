@@ -219,8 +219,10 @@ def test_merchant_login_after_approval():
     """Test Step 6: Verify Merchant Can Login After Approval"""
     print_header("STEP 6: MERCHANT LOGIN AFTER APPROVAL")
     
+    # Use the same timestamp-based email from registration
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     merchant_credentials = {
-        "email": "testmerchant@example.com",
+        "email": f"testmerchant_{timestamp}@example.com",
         "password": "Test1234"
     }
     
