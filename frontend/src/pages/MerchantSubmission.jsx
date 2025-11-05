@@ -132,9 +132,6 @@ const MerchantSubmission = () => {
       submitData.append('discount', formData.discount);
       submitData.append('category', formData.category);
       submitData.append('externalUrl', formData.externalUrl);
-      if (formData.story) {
-        submitData.append('story', formData.story);
-      }
       
       // Append main image
       submitData.append('mainImage', mainImage);
