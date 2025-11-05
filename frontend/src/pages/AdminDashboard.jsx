@@ -361,6 +361,50 @@ const AdminDashboard = () => {
                         </Button>
                       </div>
                     )}
+                    
+                    {account.accountStatus === 'active' && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSuspendMerchant(account.id)}
+                          style={{ borderColor: '#eab308', color: '#eab308' }}
+                          title="Suspend merchant account"
+                        >
+                          Suspend
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteMerchant(account.id)}
+                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                          title="Delete merchant account and all deals"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {account.accountStatus === 'rejected' && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAccountStatusUpdate(account.id, 'active')}
+                          style={{ backgroundColor: '#22c55e', color: '#FFF' }}
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteMerchant(account.id)}
+                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
