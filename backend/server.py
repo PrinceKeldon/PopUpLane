@@ -581,7 +581,6 @@ async def create_merchant_deal(
     discount: str = Form(...),
     category: str = Form(...),
     externalUrl: str = Form(...),
-    story: str = Form(None),
     mainImage: UploadFile = File(...),
     additionalImages: List[UploadFile] = File(None),
     merchant_data: dict = Depends(verify_merchant_token)
@@ -590,6 +589,10 @@ async def create_merchant_deal(
     try:
         merchant_id = merchant_data['merchant_id']
         deal_id = str(uuid.uuid4())
+        
+        # Get merchant account to attach founder story to deals
+        merchant_account = await db.merchant_accounts.find_one({\"id\": merchant_id})
+        founder_story = merchant_account.get('founderStory', '') if merchant_account else ''
         
         # Save main image
         main_image_path, main_image_size = await save_upload_file(mainImage, merchant_id, deal_id)
